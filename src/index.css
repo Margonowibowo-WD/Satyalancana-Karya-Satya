@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Print styling for official government documents (Daftar Nominatif & Form F-01) */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}

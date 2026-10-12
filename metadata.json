@@ -1,0 +1,6 @@
+{
+  "name": "SI-SLKS Nasional - Usulan Satyalancana Karya Satya",
+  "description": "Sistem Informasi Manajemen Pengusulan Tanda Kehormatan Satyalancana Karya Satya bagi ASN/PNS se-Indonesia terintegrasi Google Sheets dan standar BKN.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
