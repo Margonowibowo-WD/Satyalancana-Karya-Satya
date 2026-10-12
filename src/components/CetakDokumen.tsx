@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UsulanSLKS, PengaturanInstansi } from '../types/slks';
 import { formatNIP } from '../utils/nipParser';
-import { Printer, FileText, CheckCircle2, Building2 } from 'lucide-react';
+import { Printer, FileText, CheckCircle2, Building2, FileSpreadsheet, Download } from 'lucide-react';
 
 interface CetakDokumenProps {
   usulanList: UsulanSLKS[];
@@ -36,6 +36,50 @@ export const CetakDokumen: React.FC<CetakDokumenProps> = ({
     window.print();
   };
 
+  // Ekspor 10 Kolom Persis image.png: No, NIP, Nama, Pangkat, Jabatan, SlksLama, NoKeppres, TglKeppres, SlksUsul, KdWil
+  const handleExportCSVBKN = () => {
+    const headers = [
+      'No',
+      'NIP',
+      'Nama',
+      'Pangkat',
+      'Jabatan',
+      'SlksLama',
+      'NoKeppres',
+      'TglKeppres',
+      'SlksUsul',
+      'KdWil',
+    ];
+
+    const rows = msList.map((item, idx) => [
+      idx + 1,
+      `'${item.pegawai.nip}`,
+      `"${item.pegawai.nama.replace(/"/g, '""')}"`,
+      `"${item.pegawai.kdPangkat}"`,
+      `"${item.pegawai.jabatan.replace(/"/g, '""')}"`,
+      `"${item.slksLamaTingkat || item.pegawai.riwayatSlks?.[0]?.tingkat || '-'}"`,
+      `"${item.slksLamaNoKeppres || item.pegawai.riwayatSlks?.[0]?.noKeppres || '-'}"`,
+      `"${item.slksLamaTglKeppres || item.pegawai.riwayatSlks?.[0]?.tglKeppres || '-'}"`,
+      `"${item.slksUsul}"`,
+      `"${item.pegawai.kdWil || pengaturan?.kdWil || '-'}"`,
+    ]);
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,\uFEFF' +
+      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute(
+      'download',
+      `Nominatif_SLKS_10_Kolom_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Control Toolbar (Hidden in Print) */}
@@ -44,17 +88,26 @@ export const CetakDokumen: React.FC<CetakDokumenProps> = ({
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-teal-800">
               <Building2 className="w-4 h-4 text-teal-700" />
-              <span>BKPSDM KABUPATEN MUKOMUKO · PUSAT CETAK BERKAS RESMI</span>
+              <span>{(pengaturan?.namaInstansi || 'SISTEM PENGUSULAN SLKS NASIONAL').toUpperCase()} · PUSAT CETAK BERKAS RESMI</span>
             </div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mt-1">
               GENERATOR & CETAK DOKUMEN USULAN SLKS
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Daftar Nominatif Lampiran Keputusan Presiden RI dan Blanko Riwayat Hidup F-01 siap print / simpan PDF.
+              Daftar Nominatif Lampiran Keputusan Presiden RI (Format 10 Kolom BKN) dan Blanko Riwayat Hidup F-01 siap cetak / simpan PDF.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            <button
+              type="button"
+              onClick={handleExportCSVBKN}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold rounded-xl text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
+              title="Unduh format 10 kolom sesuai format standar BKN / Excel"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+              <span>Unduh Excel / CSV (10 Kolom)</span>
+            </button>
             <button
               type="button"
               onClick={handlePrint}
@@ -163,55 +216,63 @@ export const CetakDokumen: React.FC<CetakDokumenProps> = ({
               </div>
             </div>
 
-            {/* Tabel Nominatif */}
-            <div className="border border-slate-900 overflow-hidden">
+            {/* Tabel Nominatif Sesuai image.png (10 Kolom: No, NIP, Nama, Pangkat, Jabatan, SlksLama, NoKeppres, TglKeppres, SlksUsul, KdWil) */}
+            <div className="border border-slate-900 overflow-x-auto">
               <table className="min-w-full text-xs divide-y divide-slate-900 font-serif">
-                <thead className="bg-slate-100 font-bold divide-y divide-slate-900">
+                <thead className="bg-slate-100 font-bold divide-y divide-slate-900 text-slate-900">
                   <tr className="divide-x divide-slate-900 text-center">
-                    <th className="px-2 py-2 w-8">NO</th>
-                    <th className="px-3 py-2 text-left">NAMA LENGKAP & NIP</th>
-                    <th className="px-2 py-2 text-left">PANGKAT / GOL</th>
-                    <th className="px-3 py-2 text-left">JABATAN & UNIT KERJA</th>
-                    <th className="px-2 py-2 w-20">MASA KERJA</th>
-                    <th className="px-2 py-2 w-28">TANDA KEHORMATAN</th>
-                    <th className="px-2 py-2 w-24">STATUS</th>
+                    <th className="px-1.5 py-2 w-8">No</th>
+                    <th className="px-2 py-2 text-left">NIP</th>
+                    <th className="px-3 py-2 text-left">Nama</th>
+                    <th className="px-2 py-2 text-center">Pangkat</th>
+                    <th className="px-3 py-2 text-left">Jabatan</th>
+                    <th className="px-2 py-2 text-center w-16">SlksLama</th>
+                    <th className="px-2.5 py-2 text-left">NoKeppres</th>
+                    <th className="px-2 py-2 text-center w-20">TglKeppres</th>
+                    <th className="px-2 py-2 text-center font-bold w-16">SlksUsul</th>
+                    <th className="px-2 py-2 text-center w-16">KdWil</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-900">
+                <tbody className="divide-y divide-slate-900 bg-white">
                   {msList.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-slate-500 italic">
+                      <td colSpan={10} className="px-4 py-8 text-center text-slate-500 italic">
                         Tidak ada usulan yang memenuhi syarat (MS) pada kategori terpilih.
                       </td>
                     </tr>
                   ) : (
                     msList.map((item, idx) => (
-                      <tr key={item.id} className="divide-x divide-slate-900">
-                        <td className="px-2 py-2 text-center tabular-nums">{idx + 1}</td>
-                        <td className="px-3 py-2">
-                          <div className="font-bold">{item.pegawai.nama}</div>
-                          <div className="font-mono text-[11px]">{formatNIP(item.pegawai.nip)}</div>
+                      <tr key={item.id} className="divide-x divide-slate-900 hover:bg-slate-50/50">
+                        <td className="px-1.5 py-2 text-center tabular-nums">{idx + 1}</td>
+                        <td className="px-2 py-2 font-mono text-[11px] whitespace-nowrap">
+                          {item.pegawai.nip}
                         </td>
-                        <td className="px-2 py-2">
-                          <div>{item.pegawai.namaPangkat}</div>
-                          <div className="font-bold">({item.pegawai.kdPangkat})</div>
+                        <td className="px-3 py-2 font-semibold">
+                          {item.pegawai.nama}
+                        </td>
+                        <td className="px-2 py-2 text-center font-medium whitespace-nowrap">
+                          {item.pegawai.kdPangkat}
                         </td>
                         <td className="px-3 py-2">
                           <div>{item.pegawai.jabatan}</div>
-                          <div className="text-[11px] text-slate-600">{item.pegawai.unitKerja}</div>
-                        </td>
-                        <td className="px-2 py-2 text-center tabular-nums font-mono">
-                          {item.mkPnsTahun} Th {item.mkPnsBulan} Bl
+                          {item.pegawai.unitKerja && (
+                            <div className="text-[10px] text-slate-500">{item.pegawai.unitKerja}</div>
+                          )}
                         </td>
                         <td className="px-2 py-2 text-center font-bold">
-                          {item.slksUsul === 'X'
-                            ? '10 TAHUN (X)'
-                            : item.slksUsul === 'XX'
-                            ? '20 TAHUN (XX)'
-                            : '30 TAHUN (XXX)'}
+                          {item.slksLamaTingkat || item.pegawai.riwayatSlks?.[0]?.tingkat || '-'}
                         </td>
-                        <td className="px-2 py-2 text-center text-[10px] font-semibold text-emerald-900">
-                          MS (Memenuhi Syarat)
+                        <td className="px-2.5 py-2 text-[11px] text-slate-700">
+                          {item.slksLamaNoKeppres || item.pegawai.riwayatSlks?.[0]?.noKeppres || '-'}
+                        </td>
+                        <td className="px-2 py-2 text-center text-[11px] whitespace-nowrap">
+                          {item.slksLamaTglKeppres || item.pegawai.riwayatSlks?.[0]?.tglKeppres || '-'}
+                        </td>
+                        <td className="px-2 py-2 text-center font-bold text-teal-900 bg-teal-50/30">
+                          {item.slksUsul}
+                        </td>
+                        <td className="px-2 py-2 text-center font-mono text-[11px]">
+                          {item.pegawai.kdWil || pengaturan?.kdWil || '-'}
                         </td>
                       </tr>
                     ))

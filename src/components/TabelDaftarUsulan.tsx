@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { UsulanSLKS, TingkatSLKS, StatusKelayakan } from '../types/slks';
+import { UsulanSLKS, TingkatSLKS, StatusKelayakan, PengaturanInstansi } from '../types/slks';
 import { MedalBadge } from './MedalBadge';
 import { formatNIP } from '../utils/nipParser';
 import {
@@ -14,6 +14,14 @@ import {
   Clock,
   Eye,
   FileSpreadsheet,
+  Award,
+  Users,
+  ShieldCheck,
+  PlusCircle,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 
 interface TabelDaftarUsulanProps {
@@ -27,6 +35,9 @@ interface TabelDaftarUsulanProps {
     noKeppres?: string,
     tglKeppres?: string
   ) => void;
+  pengaturan?: PengaturanInstansi;
+  onExportBackup?: () => void;
+  onNavigateToInput?: () => void;
 }
 
 export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
@@ -35,6 +46,9 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
   onDeleteUsulan,
   onCetakUsulan,
   onUpdateStatusWorkflow,
+  pengaturan,
+  onExportBackup,
+  onNavigateToInput,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterKelayakan, setFilterKelayakan] = useState<StatusKelayakan | 'ALL'>('ALL');
@@ -45,6 +59,15 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
   const [keppresModalUsulan, setKeppresModalUsulan] = useState<UsulanSLKS | null>(null);
   const [inputNoKeppres, setInputNoKeppres] = useState('');
   const [inputTglKeppres, setInputTglKeppres] = useState('');
+
+  // Perhitungan Statistik Real-time
+  const total = usulanList.length;
+  const countMS = usulanList.filter((u) => u.statusKelayakan === 'MS').length;
+  const countTMS = usulanList.filter((u) => u.statusKelayakan === 'TMS').length;
+  const count10 = usulanList.filter((u) => u.slksUsul === 'X').length;
+  const count20 = usulanList.filter((u) => u.slksUsul === 'XX').length;
+  const count30 = usulanList.filter((u) => u.slksUsul === 'XXX').length;
+  const msPercentage = total > 0 ? Math.round((countMS / total) * 100) : 0;
 
   // Filtering Logic
   const filteredList = useMemo(() => {
@@ -66,42 +89,33 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
     });
   }, [usulanList, searchTerm, filterKelayakan, filterTingkat]);
 
-  // Ekspor ke CSV
-  const handleExportCSV = () => {
+  // Ekspor 10 Kolom Persis Sesuai Format image.png:
+  // No, NIP, Nama, Pangkat, Jabatan, SlksLama, NoKeppres, TglKeppres, SlksUsul, KdWil
+  const handleExportCSV10Kolom = () => {
     const headers = [
       'No',
       'NIP',
-      'Nama Pegawai',
-      'Pangkat/Golongan',
+      'Nama',
+      'Pangkat',
       'Jabatan',
-      'Unit Kerja',
-      'Instansi',
-      'Masa Kerja Tahun',
-      'Masa Kerja Bulan',
-      'SLKS Usulan',
-      'Periode Usulan',
-      'Status Kelayakan (MS/TMS)',
-      'Keterangan TMS',
-      'Status Usulan',
-      'No Keppres',
+      'SlksLama',
+      'NoKeppres',
+      'TglKeppres',
+      'SlksUsul',
+      'KdWil',
     ];
 
     const rows = filteredList.map((item, idx) => [
       idx + 1,
       `'${item.pegawai.nip}`,
       `"${item.pegawai.nama.replace(/"/g, '""')}"`,
-      `"${item.pegawai.kdPangkat} - ${item.pegawai.namaPangkat}"`,
+      `"${item.pegawai.kdPangkat}"`,
       `"${item.pegawai.jabatan.replace(/"/g, '""')}"`,
-      `"${(item.pegawai.unitKerja || '').replace(/"/g, '""')}"`,
-      `"${(item.pegawai.instansi || '').replace(/"/g, '""')}"`,
-      item.mkPnsTahun,
-      item.mkPnsBulan,
-      item.slksUsul === 'X' ? '10 Tahun' : item.slksUsul === 'XX' ? '20 Tahun' : '30 Tahun',
-      `${item.bulanPengusulan}/${item.tahunPengusulan}`,
-      item.statusKelayakan,
-      `"${(item.keteranganTms || '').replace(/"/g, '""')}"`,
-      `"${item.statusUsulan}"`,
-      `"${item.noKeppres || '-'}"`,
+      `"${item.slksLamaTingkat || item.pegawai.riwayatSlks?.[0]?.tingkat || '-'}"`,
+      `"${item.slksLamaNoKeppres || item.pegawai.riwayatSlks?.[0]?.noKeppres || '-'}"`,
+      `"${item.slksLamaTglKeppres || item.pegawai.riwayatSlks?.[0]?.tglKeppres || '-'}"`,
+      `"${item.slksUsul}"`,
+      `"${item.pegawai.kdWil || pengaturan?.kdWil || '-'}"`,
     ]);
 
     const csvContent =
@@ -113,7 +127,7 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
     link.setAttribute('href', encodedUri);
     link.setAttribute(
       'download',
-      `Daftar_Nominatif_SLKS_${new Date().toISOString().slice(0, 10)}.csv`
+      `Nominatif_SLKS_10_Kolom_${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -131,103 +145,265 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
     setKeppresModalUsulan(null);
   };
 
-  // Hitung stats
-  const total = usulanList.length;
-  const countMS = usulanList.filter((u) => u.statusKelayakan === 'MS').length;
-  const countTMS = usulanList.filter((u) => u.statusKelayakan === 'TMS').length;
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Header and Quick Stats */}
-      <div className="bg-white border border-teal-100 rounded-2xl p-6 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-teal-800">
-              <span>BKPSDM KABUPATEN MUKOMUKO</span>
-              <span>·</span>
-              <span>Rekapitulasi Usulan Resmi</span>
+      {/* ============================================================== */}
+      {/* 1. BAGIAN STATISTIK & HEADER EKSEKUTIF (GABUNGAN & DESAIN SEGAR) */}
+      {/* ============================================================== */}
+      <div className="bg-white border border-teal-100 rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-[11px] font-bold uppercase tracking-wider">
+                {pengaturan?.namaInstansi || 'Sistem Nasional RI'}
+              </span>
+              <span className="text-slate-400 text-xs">·</span>
+              <span className="text-xs text-slate-500 font-medium">
+                Rekapitulasi & Statistik Terpadu
+              </span>
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mt-1">
-              DAFTAR NOMINATIF USULAN SATYALANCANA
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+              DAFTAR USULAN & STATISTIK SATYALANCANA
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Data rekap pengusulan tanda kehormatan ASN, status verifikasi administrasi (MS / TMS), dan pemantauan SK Presiden.
+            <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
+              Ringkasan kelayakan administrasi berpedoman pada PP No. 35/2010, sebaran jenjang tanda kehormatan, dan ekspor berkas nominatif format standar BKN (10 kolom).
             </p>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Action Buttons Toolbar */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {onNavigateToInput && (
+              <button
+                type="button"
+                onClick={onNavigateToInput}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>+ Usul Pegawai Baru</span>
+              </button>
+            )}
+
             <button
               type="button"
-              onClick={handleExportCSV}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-teal-900 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl shadow-xs transition-all cursor-pointer"
+              onClick={handleExportCSV10Kolom}
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition-colors cursor-pointer"
+              title="Unduh 10 kolom persis format tabel resmi BKN (image.png)"
             >
               <FileSpreadsheet className="w-4 h-4 text-teal-700" />
-              <span>Unduh CSV / Excel</span>
+              <span>Ekspor Format BKN (10 Kolom)</span>
             </button>
+
+            {onExportBackup && (
+              <button
+                type="button"
+                onClick={onExportBackup}
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-colors cursor-pointer"
+                title="Cadangkan seluruh basis data ke file JSON agar tidak hilang"
+              >
+                <Download className="w-4 h-4 text-slate-600" />
+                <span>Cadangkan Data (JSON)</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Quick Filter Strip & Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-100">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
-            <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
-              Total Diusulkan
-            </span>
-            <span className="text-xl font-extrabold text-slate-900 font-mono tabular-nums">
-              {total} Pegawai
-            </span>
+        {/* ============================================================== */}
+        {/* KARTU STATISTIK METRIK BERSIH, MODERN & INTERAKTIF              */}
+        {/* ============================================================== */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 pt-2">
+          {/* Metrik 1: Total Usulan */}
+          <div
+            onClick={() => {
+              setFilterKelayakan('ALL');
+              setFilterTingkat('ALL');
+            }}
+            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+              filterKelayakan === 'ALL' && filterTingkat === 'ALL'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-slate-800/20'
+                : 'bg-slate-50 hover:bg-slate-100/80 text-slate-800 border-slate-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                filterKelayakan === 'ALL' && filterTingkat === 'ALL' ? 'text-slate-300' : 'text-slate-500'
+              }`}>
+                Total Usulan
+              </span>
+              <Users className={`w-4 h-4 ${
+                filterKelayakan === 'ALL' && filterTingkat === 'ALL' ? 'text-teal-400' : 'text-slate-400'
+              }`} />
+            </div>
+            <div className="text-2xl font-black font-mono tabular-nums mt-1.5">
+              {total} <span className="text-xs font-normal opacity-80">PNS</span>
+            </div>
+            <p className={`text-[11px] mt-1 ${
+              filterKelayakan === 'ALL' && filterTingkat === 'ALL' ? 'text-slate-300' : 'text-slate-500'
+            }`}>
+              Klik untuk tampilkan semua
+            </p>
           </div>
 
-          <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-200 rounded-xl p-3.5">
-            <span className="text-[10px] font-bold text-teal-800 block uppercase tracking-wider">
-              Memenuhi Syarat (MS)
-            </span>
-            <span className="text-xl font-extrabold text-teal-950 font-mono tabular-nums">
-              {countMS} ({total ? Math.round((countMS / total) * 100) : 0}%)
-            </span>
+          {/* Metrik 2: Memenuhi Syarat (MS) */}
+          <div
+            onClick={() => setFilterKelayakan('MS')}
+            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+              filterKelayakan === 'MS'
+                ? 'bg-emerald-800 text-white border-emerald-800 shadow-md ring-2 ring-emerald-500/20'
+                : 'bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-950 border-emerald-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                filterKelayakan === 'MS' ? 'text-emerald-200' : 'text-emerald-800'
+              }`}>
+                Memenuhi Syarat (MS)
+              </span>
+              <CheckCircle2 className={`w-4 h-4 ${
+                filterKelayakan === 'MS' ? 'text-emerald-300' : 'text-emerald-600'
+              }`} />
+            </div>
+            <div className="text-2xl font-black font-mono tabular-nums mt-1.5">
+              {countMS} <span className="text-xs font-normal opacity-85">({msPercentage}%)</span>
+            </div>
+            {/* Progress bar visual */}
+            <div className="w-full bg-emerald-200/50 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${filterKelayakan === 'MS' ? 'bg-emerald-300' : 'bg-emerald-600'}`}
+                style={{ width: `${msPercentage}%` }}
+              />
+            </div>
           </div>
 
-          <div className="bg-rose-50/80 border border-rose-200 rounded-xl p-3.5">
-            <span className="text-[10px] font-bold text-rose-800 block uppercase tracking-wider">
-              Tidak Memenuhi (TMS)
-            </span>
-            <span className="text-xl font-extrabold text-rose-950 font-mono tabular-nums">
-              {countTMS} Pegawai
-            </span>
+          {/* Metrik 3: Tidak Memenuhi Syarat (TMS) */}
+          <div
+            onClick={() => setFilterKelayakan('TMS')}
+            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+              filterKelayakan === 'TMS'
+                ? 'bg-rose-900 text-white border-rose-900 shadow-md ring-2 ring-rose-500/20'
+                : 'bg-rose-50/80 hover:bg-rose-100/80 text-rose-950 border-rose-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                filterKelayakan === 'TMS' ? 'text-rose-200' : 'text-rose-800'
+              }`}>
+                Tidak Memenuhi (TMS)
+              </span>
+              <AlertCircle className={`w-4 h-4 ${
+                filterKelayakan === 'TMS' ? 'text-rose-300' : 'text-rose-600'
+              }`} />
+            </div>
+            <div className="text-2xl font-black font-mono tabular-nums mt-1.5">
+              {countTMS} <span className="text-xs font-normal opacity-80">PNS</span>
+            </div>
+            <p className={`text-[11px] mt-1 ${
+              filterKelayakan === 'TMS' ? 'text-rose-200' : 'text-rose-700'
+            }`}>
+              {countTMS > 0 ? 'Klik untuk tinjau alasan TMS' : 'Nihil (Semua Memenuhi)'}
+            </p>
           </div>
 
-          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5">
-            <span className="text-[10px] font-bold text-amber-900 block uppercase tracking-wider">
-              SLKS Emas (30 Th)
-            </span>
-            <span className="text-xl font-extrabold text-amber-950 font-mono tabular-nums">
-              {usulanList.filter((u) => u.slksUsul === 'XXX').length} Pegawai
-            </span>
+          {/* Metrik 4: Distribusi Jenjang Tanda Kehormatan (10, 20, 30 Thn) */}
+          <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
+                Jenjang Tanda Kehormatan
+              </span>
+              <Award className="w-4 h-4 text-amber-600" />
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 mt-2">
+              <button
+                type="button"
+                onClick={() => setFilterTingkat(filterTingkat === 'X' ? 'ALL' : 'X')}
+                className={`py-1.5 px-1 rounded-lg text-center transition-all cursor-pointer ${
+                  filterTingkat === 'X'
+                    ? 'bg-amber-700 text-white font-bold shadow-xs'
+                    : 'bg-white/80 hover:bg-white text-amber-950 border border-amber-200'
+                }`}
+              >
+                <div className="text-[10px] font-semibold opacity-75">10 Th (X)</div>
+                <div className="text-base font-extrabold font-mono">{count10}</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterTingkat(filterTingkat === 'XX' ? 'ALL' : 'XX')}
+                className={`py-1.5 px-1 rounded-lg text-center transition-all cursor-pointer ${
+                  filterTingkat === 'XX'
+                    ? 'bg-slate-700 text-white font-bold shadow-xs'
+                    : 'bg-white/80 hover:bg-white text-slate-800 border border-slate-300'
+                }`}
+              >
+                <div className="text-[10px] font-semibold opacity-75">20 Th (XX)</div>
+                <div className="text-base font-extrabold font-mono">{count20}</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterTingkat(filterTingkat === 'XXX' ? 'ALL' : 'XXX')}
+                className={`py-1.5 px-1 rounded-lg text-center transition-all cursor-pointer ${
+                  filterTingkat === 'XXX'
+                    ? 'bg-yellow-600 text-white font-bold shadow-xs'
+                    : 'bg-white/80 hover:bg-white text-yellow-950 border border-yellow-300'
+                }`}
+              >
+                <div className="text-[10px] font-semibold opacity-75">30 Th (XXX)</div>
+                <div className="text-base font-extrabold font-mono">{count30}</div>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Search & Filters Bar */}
-        <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        {/* Security & Offline Reassurance Banner (Menghilangkan Kecemasan Data Hilang) */}
+        <div className="flex items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-teal-50/70 via-emerald-50/50 to-slate-50 border border-teal-200/80 rounded-xl text-xs text-slate-700">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold text-teal-950">
+                Penyimpanan Data Permanen di Perangkat Ini
+              </span>
+              <span className="hidden sm:inline text-slate-500 ml-1.5">
+                · Data tersimpan otomatis di browser laptop Anda, tidak akan hilang saat browser ditutup, offline, atau laptop dimatikan.
+              </span>
+            </div>
+          </div>
+          {onExportBackup && (
+            <button
+              type="button"
+              onClick={onExportBackup}
+              className="text-xs font-bold text-teal-800 hover:text-teal-950 underline shrink-0 cursor-pointer"
+            >
+              Simpan Cadangan File (.json)
+            </button>
+          )}
+        </div>
+
+        {/* ============================================================== */}
+        {/* PENCARIAN & KONTROL FILTER TABEL                               */}
+        {/* ============================================================== */}
+        <div className="pt-2 border-t border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Cari Nama, NIP, atau Unit Kerja..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:border-teal-600 rounded-xl text-xs sm:text-sm text-slate-800 outline-none"
+              placeholder="Cari Nama Pegawai, NIP, Jabatan, atau Unit Kerja..."
+              className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/90 border border-slate-200 focus:bg-white focus:border-teal-700 focus:ring-2 focus:ring-teal-700/10 rounded-xl text-xs sm:text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400"
             />
           </div>
 
-          {/* Segmented Filter Buttons */}
+          {/* Filter Pills & Reset */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Filter Kelayakan */}
+            {/* Filter Kelayakan Pills */}
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
               <button
                 type="button"
                 onClick={() => setFilterKelayakan('ALL')}
-                className={`px-3 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                   filterKelayakan === 'ALL'
                     ? 'bg-white text-slate-900 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -238,10 +414,10 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
               <button
                 type="button"
                 onClick={() => setFilterKelayakan('MS')}
-                className={`px-3 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                   filterKelayakan === 'MS'
-                    ? 'bg-white text-teal-800 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'text-emerald-800 hover:bg-emerald-50'
                 }`}
               >
                 MS ({countMS})
@@ -249,38 +425,56 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
               <button
                 type="button"
                 onClick={() => setFilterKelayakan('TMS')}
-                className={`px-3 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                   filterKelayakan === 'TMS'
-                    ? 'bg-white text-rose-800 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-rose-700 text-white shadow-xs'
+                    : 'text-rose-800 hover:bg-rose-50'
                 }`}
               >
                 TMS ({countTMS})
               </button>
             </div>
 
-            {/* Filter Tingkat */}
+            {/* Filter Tingkat Select */}
             <select
               value={filterTingkat}
               onChange={(e) => setFilterTingkat(e.target.value as any)}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-xs bg-white text-slate-700 outline-none font-medium"
+              className="px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white text-slate-800 outline-none font-semibold cursor-pointer shadow-2xs"
             >
-              <option value="ALL">Semua Tingkat SLKS</option>
+              <option value="ALL">Semua Kategori (10, 20, 30 Th)</option>
               <option value="X">SLKS X (10 Tahun)</option>
               <option value="XX">SLKS XX (20 Tahun)</option>
               <option value="XXX">SLKS XXX (30 Tahun)</option>
             </select>
+
+            {(searchTerm || filterKelayakan !== 'ALL' || filterTingkat !== 'ALL') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterKelayakan('ALL');
+                  setFilterTingkat('ALL');
+                }}
+                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                title="Bersihkan semua filter"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Main Table View */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+      {/* ============================================================== */}
+      {/* 2. TABEL DAFTAR USULAN PEGAWAI                                 */}
+      {/* ============================================================== */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50 font-semibold text-slate-700 text-xs uppercase tracking-wider">
+          <table className="min-w-full divide-y divide-slate-200 text-xs sm:text-sm">
+            <thead className="bg-slate-50/90 font-bold text-slate-700 text-[11px] uppercase tracking-wider">
               <tr>
-                <th scope="col" className="px-4 py-3 text-left w-12">
+                <th scope="col" className="px-3.5 py-3 text-center w-12">
                   No
                 </th>
                 <th scope="col" className="px-4 py-3 text-left">
@@ -289,67 +483,67 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
                 <th scope="col" className="px-4 py-3 text-left">
                   Pangkat & Jabatan
                 </th>
-                <th scope="col" className="px-4 py-3 text-center">
+                <th scope="col" className="px-3.5 py-3 text-center">
                   Masa Kerja
                 </th>
-                <th scope="col" className="px-4 py-3 text-center">
-                  Usulan SLKS
+                <th scope="col" className="px-3.5 py-3 text-center">
+                  SLKS Usulan
                 </th>
-                <th scope="col" className="px-4 py-3 text-center">
+                <th scope="col" className="px-3.5 py-3 text-center">
                   Kelayakan
                 </th>
-                <th scope="col" className="px-4 py-3 text-center">
-                  Tahapan Usulan
+                <th scope="col" className="px-3.5 py-3 text-center">
+                  Status Usulan
                 </th>
                 <th scope="col" className="px-4 py-3 text-right">
                   Aksi
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-slate-100 bg-white">
               {filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-14 text-center text-slate-500">
                     <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="font-semibold text-slate-700">Tidak ada data usulan yang cocok</p>
+                    <p className="font-bold text-slate-700 text-sm">Tidak ada data usulan yang cocok</p>
                     <p className="text-xs text-slate-500 mt-1">
-                      Coba ubah kata kunci pencarian atau filter status.
+                      Coba ubah kata kunci pencarian atau sesuaikan filter status kelayakan.
                     </p>
                   </td>
                 </tr>
               ) : (
                 filteredList.map((item, idx) => (
-                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={item.id} className="hover:bg-teal-50/30 transition-colors">
                     {/* No */}
-                    <td className="px-4 py-3.5 text-xs text-slate-500 font-mono tabular-nums">
+                    <td className="px-3.5 py-3 text-center text-slate-500 font-mono text-xs tabular-nums">
                       {idx + 1}
                     </td>
 
                     {/* Pegawai */}
-                    <td className="px-4 py-3.5">
-                      <div className="font-semibold text-slate-900">{item.pegawai.nama}</div>
-                      <div className="text-xs text-slate-500 font-mono tracking-wider">
+                    <td className="px-4 py-3">
+                      <div className="font-bold text-slate-900">{item.pegawai.nama}</div>
+                      <div className="text-xs text-slate-500 font-mono tracking-wider mt-0.5">
                         {formatNIP(item.pegawai.nip)}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5">
-                        {item.pegawai.unitKerja} · {item.pegawai.kabKota || item.pegawai.provinsi}
+                        {item.pegawai.unitKerja || 'Instansi Induk'}
                       </div>
                     </td>
 
                     {/* Pangkat & Jabatan */}
-                    <td className="px-4 py-3.5 text-xs">
-                      <div className="font-medium text-slate-800">
+                    <td className="px-4 py-3 text-xs">
+                      <div className="font-semibold text-slate-900">
                         Gol. {item.pegawai.kdPangkat} ({item.pegawai.namaPangkat})
                       </div>
-                      <div className="text-slate-500 line-clamp-1 max-w-xs" title={item.pegawai.jabatan}>
+                      <div className="text-slate-600 line-clamp-1 max-w-xs mt-0.5" title={item.pegawai.jabatan}>
                         {item.pegawai.jabatan}
                       </div>
                     </td>
 
                     {/* Masa Kerja */}
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-3.5 py-3 text-center">
                       <span className="font-mono font-bold text-slate-900 text-xs tabular-nums">
-                        {item.mkPnsTahun} Thn {item.mkPnsBulan} Bln
+                        {item.mkPnsTahun} Th {item.mkPnsBulan} Bl
                       </span>
                       {item.pegawai.noSkHukdis && (
                         <div className="text-[10px] text-rose-600 font-semibold mt-0.5">
@@ -359,20 +553,20 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
                     </td>
 
                     {/* Usulan SLKS */}
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-3.5 py-3 text-center">
                       <MedalBadge tingkat={item.slksUsul} size="sm" />
                     </td>
 
                     {/* Kelayakan MS / TMS */}
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-3.5 py-3 text-center">
                       {item.statusKelayakan === 'MS' ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                           MS
                         </span>
                       ) : (
                         <span
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300 cursor-help"
                           title={item.keteranganTms}
                         >
                           <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
@@ -381,9 +575,9 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
                       )}
                     </td>
 
-                    {/* Tahapan Usulan */}
-                    <td className="px-4 py-3.5 text-center text-xs">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                    {/* Status Usulan */}
+                    <td className="px-3.5 py-3 text-center text-xs">
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 block">
                         {item.statusUsulan}
                       </span>
                       {item.noKeppres && (
@@ -394,40 +588,40 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
                     </td>
 
                     {/* Aksi */}
-                    <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => setDetailModalUsulan(item)}
-                          className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors cursor-pointer"
-                          title="Lihat Detail Profil & Riwayat"
+                          className="p-1.5 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors cursor-pointer"
+                          title="Lihat Detail Lengkap"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => onCetakUsulan(item)}
-                          className="p-1.5 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 rounded transition-colors cursor-pointer"
-                          title="Cetak Berkas Usulan (Portofolio F-01)"
+                          className="p-1.5 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors cursor-pointer"
+                          title="Cetak Berkas F-01 Pegawai"
                         >
                           <Printer className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => onEditUsulan(item)}
-                          className="p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded transition-colors cursor-pointer"
-                          title="Edit Formulir"
+                          className="p-1.5 text-slate-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          title="Edit / Koreksi Usulan"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => {
-                            if (confirm(`Hapus usulan atas nama ${item.pegawai.nama}?`)) {
+                            if (confirm(`Yakin ingin menghapus usulan untuk ${item.pegawai.nama}?`)) {
                               onDeleteUsulan(item.id);
                             }
                           }}
-                          className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                          className="p-1.5 text-slate-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                           title="Hapus Usulan"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -442,127 +636,121 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
         </div>
       </div>
 
-      {/* Modal Detail Usulan & Verifikasi */}
+      {/* ============================================================== */}
+      {/* 3. MODAL DETAIL USULAN PEGAWAI                                 */}
+      {/* ============================================================== */}
       {detailModalUsulan && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                  Detail Profil Usulan Satyalancana
+                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">
+                  Rincian Profil Usulan Tanda Kehormatan
                 </span>
-                <h3 className="text-lg font-bold text-slate-900">{detailModalUsulan.pegawai.nama}</h3>
+                <h2 className="text-xl font-extrabold text-slate-900 mt-0.5">
+                  {detailModalUsulan.pegawai.nama}
+                </h2>
+                <p className="text-xs font-mono text-slate-500">
+                  NIP: {detailModalUsulan.pegawai.nip}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setDetailModalUsulan(null)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 text-lg font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-1">
-                <span className="text-slate-500 font-semibold block">NIP (BKN)</span>
-                <span className="font-mono text-sm font-bold text-slate-900">
-                  {formatNIP(detailModalUsulan.pegawai.nip)}
-                </span>
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+                <span className="text-slate-500 font-medium">Pangkat / Golongan:</span>
+                <p className="font-bold text-slate-900">
+                  {detailModalUsulan.pegawai.namaPangkat} ({detailModalUsulan.pegawai.kdPangkat})
+                </p>
               </div>
-              <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-1">
-                <span className="text-slate-500 font-semibold block">Pangkat & Golongan</span>
-                <span className="text-sm font-bold text-slate-900">
-                  {detailModalUsulan.pegawai.kdPangkat} - {detailModalUsulan.pegawai.namaPangkat}
-                </span>
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+                <span className="text-slate-500 font-medium">Jabatan & Unit Kerja:</span>
+                <p className="font-bold text-slate-900">
+                  {detailModalUsulan.pegawai.jabatan}
+                </p>
+                <p className="text-slate-600">{detailModalUsulan.pegawai.unitKerja}</p>
               </div>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Jabatan:</span>
-                <span className="font-medium text-slate-900">{detailModalUsulan.pegawai.jabatan}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Unit Kerja & Instansi:</span>
-                <span className="font-medium text-slate-900">
-                  {detailModalUsulan.pegawai.unitKerja} ({detailModalUsulan.pegawai.instansi})
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">TMT CPNS:</span>
-                <span className="font-mono text-slate-900">{detailModalUsulan.pegawai.tmtCpns}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Masa Kerja Nyata (mkpns):</span>
-                <span className="font-mono font-bold text-slate-900">
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+                <span className="text-slate-500 font-medium">Masa Kerja Riil:</span>
+                <p className="font-bold text-slate-900 font-mono">
                   {detailModalUsulan.mkPnsTahun} Tahun {detailModalUsulan.mkPnsBulan} Bulan
-                </span>
+                </p>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Tanda Kehormatan Diusulkan:</span>
-                <MedalBadge tingkat={detailModalUsulan.slksUsul} size="sm" />
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Status Kelayakan:</span>
-                <span
-                  className={`font-bold ${
-                    detailModalUsulan.statusKelayakan === 'MS'
-                      ? 'text-emerald-700'
-                      : 'text-rose-700'
-                  }`}
-                >
-                  {detailModalUsulan.statusKelayakan === 'MS'
-                    ? 'MS (Memenuhi Syarat)'
-                    : 'TMS (Tidak Memenuhi Syarat)'}
-                </span>
-              </div>
-            </div>
-
-            {/* Riwayat Sebelumnya */}
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-xs font-bold text-slate-700 uppercase block mb-1.5">
-                Riwayat Satyalancana Sebelumnya:
-              </span>
-              {detailModalUsulan.pegawai.riwayatSlks &&
-              detailModalUsulan.pegawai.riwayatSlks.length > 0 ? (
-                <div className="space-y-1 text-xs">
-                  {detailModalUsulan.pegawai.riwayatSlks.map((rw) => (
-                    <div key={rw.id} className="flex items-center justify-between bg-white p-2 rounded border border-slate-200">
-                      <MedalBadge tingkat={rw.tingkat} size="sm" />
-                      <span className="font-mono text-slate-700">SK: {rw.noKeppres} ({rw.tglKeppres})</span>
-                    </div>
-                  ))}
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+                <span className="text-slate-500 font-medium">Tanda Kehormatan Diusul:</span>
+                <div className="pt-1">
+                  <MedalBadge tingkat={detailModalUsulan.slksUsul} size="md" />
                 </div>
-              ) : (
-                <span className="text-xs text-slate-400 italic">Belum pernah memperoleh penghargaan.</span>
-              )}
+              </div>
             </div>
 
-            {/* Jika TMS */}
-            {detailModalUsulan.statusKelayakan === 'TMS' && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-900">
-                <span className="font-bold block mb-1">Catatan Alasan TMS:</span>
-                <p>{detailModalUsulan.keteranganTms || 'Tidak memenuhi kriteria masa kerja atau syarat integritas.'}</p>
-              </div>
-            )}
+            {/* Evaluasi Kelayakan */}
+            <div className={`p-4 rounded-xl border text-xs space-y-1 ${
+              detailModalUsulan.statusKelayakan === 'MS'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                : 'bg-rose-50 border-rose-200 text-rose-950'
+            }`}>
+              <span className="font-bold block flex items-center gap-1.5">
+                {detailModalUsulan.statusKelayakan === 'MS' ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    Status: MEMENUHI SYARAT (MS)
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-rose-600" />
+                    Status: TIDAK MEMENUHI SYARAT (TMS)
+                  </>
+                )}
+              </span>
+              <p className="leading-relaxed">
+                {detailModalUsulan.statusKelayakan === 'MS'
+                  ? 'Masa kerja mencukupi sesuai PP No. 35/2010 dan tidak ada catatan hukuman disiplin sedang/berat.'
+                  : `Catatan Kendala: ${detailModalUsulan.keteranganTms || 'Masa kerja belum mencapai target atau ada catatan hukuman disiplin.'}`}
+              </p>
+            </div>
 
-            {/* Action Buttons in Modal */}
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+            {/* Riwayat Keppres Lama / Terbit */}
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
+              <span className="font-bold text-slate-800 block">Riwayat Keputusan Presiden (Keppres):</span>
+              <div className="grid grid-cols-2 gap-2 text-slate-600 pt-1">
+                <div>
+                  <span className="text-[11px] text-slate-400 block">SLKS Lama:</span>
+                  <span className="font-semibold text-slate-800">
+                    {detailModalUsulan.slksLamaTingkat ? `SLKS ${detailModalUsulan.slksLamaTingkat}` : '-'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] text-slate-400 block">Nomor & Tanggal Keppres Lama:</span>
+                  <span className="font-semibold text-slate-800">
+                    {detailModalUsulan.slksLamaNoKeppres || '-'} ({detailModalUsulan.slksLamaTglKeppres || '-'})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => {
-                  setDetailModalUsulan(null);
                   onCetakUsulan(detailModalUsulan);
+                  setDetailModalUsulan(null);
                 }}
-                className="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" />
-                Cetak Portofolio F-01
+                Cetak Blanko F-01
               </button>
               <button
                 type="button"
                 onClick={() => setDetailModalUsulan(null)}
-                className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer"
               >
                 Tutup
               </button>

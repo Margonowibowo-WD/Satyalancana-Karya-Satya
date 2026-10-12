@@ -3,7 +3,6 @@ import { Navbar, ActiveTab } from './components/Navbar';
 import { FormUsulanSLKS } from './components/FormUsulanSLKS';
 import { TabelDaftarUsulan } from './components/TabelDaftarUsulan';
 import { CetakDokumen } from './components/CetakDokumen';
-import { DashboardStatistik } from './components/DashboardStatistik';
 import { MasterPengaturan } from './components/MasterPengaturan';
 import { PanduanPenggunaan } from './components/PanduanPenggunaan';
 import {
@@ -208,6 +207,9 @@ export default function App() {
             onDeleteUsulan={handleDeleteUsulan}
             onCetakUsulan={handleCetakUsulan}
             onUpdateStatusWorkflow={handleUpdateWorkflow}
+            pengaturan={pengaturan}
+            onExportBackup={handleExportBackup}
+            onNavigateToInput={() => setActiveTab('input')}
           />
         )}
 
@@ -216,14 +218,6 @@ export default function App() {
             usulanList={usulanList}
             activeUsulanForSinglePrint={activeUsulanForSinglePrint}
             pengaturan={pengaturan}
-          />
-        )}
-
-        {activeTab === 'statistik' && (
-          <DashboardStatistik
-            usulanList={usulanList}
-            onNavigateToForm={() => setActiveTab('input')}
-            onNavigateToList={() => setActiveTab('daftar')}
           />
         )}
 

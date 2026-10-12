@@ -1,7 +1,7 @@
 import React from 'react';
 import { Award, PlusCircle, Settings } from 'lucide-react';
 
-export type ActiveTab = 'input' | 'daftar' | 'cetak' | 'statistik' | 'master' | 'panduan';
+export type ActiveTab = 'input' | 'daftar' | 'cetak' | 'master' | 'panduan';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -40,7 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* Zone 2: 6 clean single-line text navigation links */}
+          {/* Zone 2: 5 clean single-line text navigation links */}
           <nav className="hidden md:flex items-center gap-1 p-1 bg-slate-100/80 rounded-xl border border-slate-200/60">
             <button
               type="button"
@@ -62,7 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              Daftar Usulan
+              Daftar & Statistik
             </button>
             <button
               type="button"
@@ -74,17 +74,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               Cetak Dokumen
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('statistik')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                activeTab === 'statistik'
-                  ? 'bg-white text-teal-900 shadow-xs ring-1 ring-black/5'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              Statistik
             </button>
             <button
               type="button"
@@ -149,7 +138,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'text-slate-600'
             }`}
           >
-            Daftar
+            Daftar & Statistik
           </button>
           <button
             type="button"
@@ -161,17 +150,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             Cetak
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('statistik')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap ${
-              activeTab === 'statistik'
-                ? 'bg-teal-700 text-white shadow-xs'
-                : 'text-slate-600'
-            }`}
-          >
-            Statistik
           </button>
           <button
             type="button"

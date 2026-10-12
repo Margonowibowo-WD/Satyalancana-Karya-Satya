@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 interface PanduanPenggunaanProps {
-  onNavigateToTab: (tab: 'input' | 'daftar' | 'cetak' | 'statistik' | 'master') => void;
+  onNavigateToTab: (tab: 'input' | 'daftar' | 'cetak' | 'master' | 'panduan') => void;
   onExportBackup?: () => void;
   onImportBackup?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -371,6 +371,37 @@ export const PanduanPenggunaan: React.FC<PanduanPenggunaanProps> = ({
               <p className="text-slate-600 leading-relaxed">
                 Jika Anda ingin bekerja tanpa internet, aplikasi ini dapat disimpan di laptop atau di-bookmark offline. Dan untuk mencegah kehilangan data jika berganti komputer, gunakan tombol <strong>"Cadangkan Data (Backup JSON)"</strong> di atas untuk menyimpan file database ke flashdisk.
               </p>
+            </div>
+          </div>
+
+          {/* Panduan Mengatasi Tampilan Layar Putih di GitHub */}
+          <div className="p-5 bg-amber-50/70 border border-amber-300 rounded-2xl space-y-3">
+            <div className="flex items-center gap-2 font-extrabold text-amber-950 text-sm">
+              <Sparkles className="w-4 h-4 text-amber-700" />
+              <span>CARA MENGATASI TAMPILAN KOSONG PUTIH DI GITHUB (LANGKAH-DEMI-LANGKAH)</span>
+            </div>
+            <p className="text-xs text-slate-700 leading-relaxed">
+              <strong>Penyebab Layar Putih:</strong> Di Vite, secara bawaan alamat file aset mengarah ke root (<code className="bg-amber-100 px-1 py-0.5 rounded font-mono">/assets/</code>). Di GitHub Pages, alamat website Anda memiliki sub-folder seperti <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">https://username.github.io/nama-repo/</code> sehingga file CSS &amp; JS gagal termuat (Error 404).
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-xs">
+              <div className="p-3 bg-white border border-amber-200 rounded-xl space-y-1">
+                <span className="font-bold text-slate-900 block">Langkah 1 (Sudah Kami Selesaikan):</span>
+                <p className="text-slate-600">
+                  File <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">vite.config.ts</code> sudah ditambahkan konfigurasi <code className="font-mono text-[11px] bg-amber-100 px-1 py-0.5 rounded">base: './'</code> agar semua path aset bersifat relatif di repository mana pun.
+                </p>
+              </div>
+              <div className="p-3 bg-white border border-amber-200 rounded-xl space-y-1">
+                <span className="font-bold text-slate-900 block">Langkah 2: Build Aplikasi:</span>
+                <p className="text-slate-600">
+                  Jalankan perintah <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">npm run build</code> di terminal Anda. Berkas hasil compile siap pakai akan muncul di dalam folder <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">dist/</code>.
+                </p>
+              </div>
+              <div className="p-3 bg-white border border-amber-200 rounded-xl space-y-1">
+                <span className="font-bold text-slate-900 block">Langkah 3: Publikasikan di GitHub:</span>
+                <p className="text-slate-600">
+                  Di repository GitHub Anda, buka menu <strong>Settings &gt; Pages</strong>. Pada opsi <em>Build and deployment</em>, pilih <strong>Deploy from a branch</strong> lalu arahkan ke branch <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">gh-pages</code> atau folder <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">dist</code>. Website langsung aktif tanpa layar putih!
+                </p>
+              </div>
             </div>
           </div>
         </div>
