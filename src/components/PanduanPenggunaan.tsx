@@ -375,32 +375,74 @@ export const PanduanPenggunaan: React.FC<PanduanPenggunaanProps> = ({
           </div>
 
           {/* Panduan Mengatasi Tampilan Layar Putih di GitHub */}
-          <div className="p-5 bg-amber-50/70 border border-amber-300 rounded-2xl space-y-3">
-            <div className="flex items-center gap-2 font-extrabold text-amber-950 text-sm">
-              <Sparkles className="w-4 h-4 text-amber-700" />
-              <span>CARA MENGATASI TAMPILAN KOSONG PUTIH DI GITHUB (LANGKAH-DEMI-LANGKAH)</span>
+          <div className="p-5 sm:p-6 bg-amber-50/80 border-2 border-amber-300 rounded-2xl space-y-4">
+            <div className="flex items-center gap-2 font-extrabold text-amber-950 text-base">
+              <Sparkles className="w-5 h-5 text-amber-700 shrink-0" />
+              <span>CARA MENGATASI LAYAR PUTIH KOSONG DI GITHUB (PANDUAN LENGKAP JIKA UPLOAD LANGSUNG)</span>
             </div>
-            <p className="text-xs text-slate-700 leading-relaxed">
-              <strong>Penyebab Layar Putih:</strong> Di Vite, secara bawaan alamat file aset mengarah ke root (<code className="bg-amber-100 px-1 py-0.5 rounded font-mono">/assets/</code>). Di GitHub Pages, alamat website Anda memiliki sub-folder seperti <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">https://username.github.io/nama-repo/</code> sehingga file CSS &amp; JS gagal termuat (Error 404).
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-xs">
-              <div className="p-3 bg-white border border-amber-200 rounded-xl space-y-1">
-                <span className="font-bold text-slate-900 block">Langkah 1 (Sudah Kami Selesaikan):</span>
-                <p className="text-slate-600">
-                  File <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">vite.config.ts</code> sudah ditambahkan konfigurasi <code className="font-mono text-[11px] bg-amber-100 px-1 py-0.5 rounded">base: './'</code> agar semua path aset bersifat relatif di repository mana pun.
+
+            <div className="p-4 bg-white/90 border border-amber-300/80 rounded-xl space-y-2 text-xs text-slate-700">
+              <span className="font-bold text-amber-950 block text-sm">
+                Kenapa Saat Buka Web GitHub Hasilnya Layar Putih Kosong?
+              </span>
+              <p className="leading-relaxed">
+                Ada 2 penyebab utama mengapa layar menjadi putih saat di-upload ke GitHub:
+              </p>
+              <ol className="list-decimal list-inside space-y-1.5 pl-1 font-medium">
+                <li>
+                  <strong>Path Aset Masih Root (<code className="bg-amber-100 px-1 py-0.5 rounded font-mono">/assets/</code>):</strong> Saat GitHub Pages membuka alamat repositori <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">https://username.github.io/nama-repo/</code>, browser mencari file JS/CSS di root domain sehingga terjadi Error 404. <em>(Ini sudah kami perbaiki dengan mengatur <code className="bg-teal-100 text-teal-900 px-1 py-0.5 rounded font-mono">base: './'</code> di file vite.config.ts)</em>.
+                </li>
+                <li>
+                  <strong>Mengupload Berkas Mentah (.tsx) Tanpa Di-Build:</strong> Browser seperti Chrome/Edge <em>tidak bisa menjalankan file React TypeScript (.tsx) secara langsung</em>. File mentah harus dikompilasi menjadi file HTML/JS jadi (yang ada di dalam folder <code className="bg-emerald-100 text-emerald-950 px-1 py-0.5 rounded font-mono">dist/</code>).
+                </li>
+              </ol>
+            </div>
+
+            {/* 2 Opsi Solusi Paling Mudah */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              {/* Opsi A: Menggunakan GitHub Actions Otomatis (Direkomendasikan) */}
+              <div className="p-4 bg-white border-2 border-teal-500 rounded-xl space-y-2.5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-teal-950 text-sm flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-teal-700" />
+                    CARA 1 (OTOMATIS - PALING DISARANKAN)
+                  </span>
+                  <span className="px-2 py-0.5 bg-teal-100 text-teal-900 text-[10px] font-extrabold rounded-full">
+                    Tanpa Install Apapun
+                  </span>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  Kami sudah membuatkan file otomatis di <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">.github/workflows/deploy.yml</code>. Anda cukup melakukan langkah ini di web GitHub:
                 </p>
+                <ol className="list-decimal list-inside text-slate-700 space-y-1.5 pl-1">
+                  <li>Buka repository Anda di <strong>GitHub.com</strong>.</li>
+                  <li>Klik tab <strong>Settings</strong> (ikon gerigi di atas).</li>
+                  <li>Di menu sebelah kiri, klik <strong>Pages</strong>.</li>
+                  <li>Pada bagian <strong>Build and deployment &gt; Source</strong>, ubah dari <em>"Deploy from a branch"</em> menjadi <strong>"GitHub Actions"</strong>.</li>
+                  <li>Selesai! GitHub akan otomatis meng-compile dan website Anda langsung online dalam 1 menit tanpa layar putih.</li>
+                </ol>
               </div>
-              <div className="p-3 bg-white border border-amber-200 rounded-xl space-y-1">
-                <span className="font-bold text-slate-900 block">Langkah 2: Build Aplikasi:</span>
-                <p className="text-slate-600">
-                  Jalankan perintah <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">npm run build</code> di terminal Anda. Berkas hasil compile siap pakai akan muncul di dalam folder <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">dist/</code>.
+
+              {/* Opsi B: Upload Folder dist */}
+              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                    <HardDrive className="w-4 h-4 text-slate-600" />
+                    CARA 2 (UPLOAD ISI FOLDER DIST)
+                  </span>
+                  <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-full">
+                    Manual
+                  </span>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  Jika Anda ingin upload manual biasa:
                 </p>
-              </div>
-              <div className="p-3 bg-white border border-amber-200 rounded-xl space-y-1">
-                <span className="font-bold text-slate-900 block">Langkah 3: Publikasikan di GitHub:</span>
-                <p className="text-slate-600">
-                  Di repository GitHub Anda, buka menu <strong>Settings &gt; Pages</strong>. Pada opsi <em>Build and deployment</em>, pilih <strong>Deploy from a branch</strong> lalu arahkan ke branch <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">gh-pages</code> atau folder <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">dist</code>. Website langsung aktif tanpa layar putih!
-                </p>
+                <ol className="list-decimal list-inside text-slate-700 space-y-1.5 pl-1">
+                  <li>Jalankan perintah <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">npm run build</code> di komputer Anda.</li>
+                  <li>Buka folder bernama <strong>dist</strong> yang baru saja terbuat.</li>
+                  <li>Upload seluruh file yang ada <strong>di dalam folder dist</strong> (yaitu <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">index.html</code> dan folder <code className="font-mono text-[11px] bg-slate-100 px-1 py-0.5 rounded">assets</code>) langsung ke root repository GitHub Anda.</li>
+                  <li>Di menu <strong>Settings &gt; Pages</strong>, pilih branch <strong>main</strong> / <strong>root (/)</strong>. Website langsung terbuka sempurna!</li>
+                </ol>
               </div>
             </div>
           </div>
