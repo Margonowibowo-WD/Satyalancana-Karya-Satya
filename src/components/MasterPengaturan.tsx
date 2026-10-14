@@ -67,7 +67,7 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
   const handleSimpanWilayah = (e: React.FormEvent) => {
     e.preventDefault();
     const updated: PengaturanInstansi = {
-      namaInstansi: namaInstansi.trim(),
+      namaInstansi: kabKota.trim() || namaInstansi.trim() || 'Pemerintah Kabupaten / Kota',
       kabKota: kabKota.trim(),
       provinsi: provinsi.trim(),
       kdWil: kdWil.trim(),
@@ -76,7 +76,7 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
       tahunPengusulan: Number(tahunPengusulan),
     };
     onSavePengaturan(updated);
-    triggerToast('success', 'Profil instansi dan periode pengusulan berhasil disimpan!');
+    triggerToast('success', 'Profil wilayah dan periode pengusulan berhasil disimpan!');
   };
 
   /**
@@ -400,20 +400,6 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
               </div>
             </div>
 
-            {/* Nama Instansi / Pemerintah Daerah (Manual) */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nama Instansi / Pemerintah Daerah *
-              </label>
-              <input
-                type="text"
-                required
-                value={namaInstansi}
-                onChange={(e) => setNamaInstansi(e.target.value)}
-                placeholder="Contoh: Pemerintah Kabupaten Mukomuko"
-                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm outline-none focus:border-teal-600 font-semibold"
-              />
-            </div>
 
             {/* Kabupaten / Kota (Manual) */}
             <div>

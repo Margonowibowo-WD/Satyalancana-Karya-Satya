@@ -1,5 +1,6 @@
 import { UsulanSLKS, PengaturanInstansi } from '../types/slks';
 import { getPangkatName } from '../data/pangkatData';
+import { sortUsulanList } from './storage';
 
 export interface BKNRowData {
   no: number;
@@ -18,7 +19,8 @@ export function prepareBKNRows(
   usulanList: UsulanSLKS[],
   pengaturan?: PengaturanInstansi
 ): BKNRowData[] {
-  return usulanList.map((item, idx) => {
+  const sorted = sortUsulanList(usulanList);
+  return sorted.map((item, idx) => {
     const namaPangkat = getPangkatName(item.pegawai.kdPangkat, item.pegawai.namaPangkat);
     return {
       no: idx + 1,

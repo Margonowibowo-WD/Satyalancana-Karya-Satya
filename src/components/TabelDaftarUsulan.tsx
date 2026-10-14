@@ -3,7 +3,8 @@ import { UsulanSLKS, TingkatSLKS, StatusKelayakan, PengaturanInstansi } from '..
 import { MedalBadge } from './MedalBadge';
 import { getPangkatName } from '../data/pangkatData';
 import { formatNIP } from '../utils/nipParser';
-import { exportToCSV10Kolom, exportToExcel10Kolom, prepareBKNRows } from '../utils/exportBKN';
+import { exportToCSV10Kolom, prepareBKNRows } from '../utils/exportBKN';
+import { sortUsulanList } from '../utils/storage';
 import {
   Search,
   Filter,
@@ -71,9 +72,9 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
   const count30 = usulanList.filter((u) => u.slksUsul === 'XXX').length;
   const msPercentage = total > 0 ? Math.round((countMS / total) * 100) : 0;
 
-  // Filtering Logic
+  // Filtering Logic dengan pengurutan otomatis: 1. SLKS 30>10, 2. Pangkat tertinggi>terendah, 3. Umur tertua>termuda
   const filteredList = useMemo(() => {
-    return usulanList.filter((item) => {
+    const list = usulanList.filter((item) => {
       const q = searchTerm.toLowerCase();
       const matchSearch =
         !searchTerm ||
@@ -89,6 +90,8 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
 
       return matchSearch && matchKelayakan && matchTingkat;
     });
+
+    return sortUsulanList(list);
   }, [usulanList, searchTerm, filterKelayakan, filterTingkat]);
 
   // Ekspor 10 Kolom Format Resmi BKN dengan perlindungan format Teks (NIP tidak berubah ke notasi ilmiah)
@@ -97,14 +100,6 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
     exportToCSV10Kolom(
       rows,
       `Nominatif_SLKS_10_Kolom_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-  };
-
-  const handleExportExcel10Kolom = () => {
-    const rows = prepareBKNRows(filteredList, pengaturan);
-    exportToExcel10Kolom(
-      rows,
-      `Nominatif_SLKS_10_Kolom_${new Date().toISOString().slice(0, 10)}.xls`
     );
   };
 
@@ -139,41 +134,17 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
               DAFTAR USULAN & STATISTIK SATYALANCANA
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
-              Ringkasan kelayakan administrasi berpedoman pada PP No. 35/2010, sebaran jenjang tanda kehormatan, dan ekspor berkas nominatif format standar BKN (10 kolom).
-            </p>
           </div>
 
-          {/* Action Buttons Toolbar */}
+          {/* Action Buttons Toolbar: Ekspor CSV 10 Kolom & Cadangkan Data */}
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            {onNavigateToInput && (
-              <button
-                type="button"
-                onClick={onNavigateToInput}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>+ Usul Pegawai Baru</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleExportExcel10Kolom}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-xs transition-colors cursor-pointer"
-              title="Unduh file Excel (.xls) dengan format Teks sehingga NIP 18 digit tidak akan berubah menjadi notasi ilmiah"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-100" />
-              <span>Ekspor Excel (.xls)</span>
-            </button>
-
             <button
               type="button"
               onClick={handleExportCSV10Kolom}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-teal-900 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 rounded-xl shadow-xs hover:shadow transition-all cursor-pointer"
               title="Unduh file CSV 10 kolom BKN dengan pengunci teks NIP (formula =NIP)"
             >
-              <Download className="w-4 h-4 text-teal-700" />
+              <Download className="w-4 h-4" />
               <span>Ekspor CSV (10 Kolom)</span>
             </button>
 

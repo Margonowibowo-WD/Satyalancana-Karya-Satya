@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { UsulanSLKS, PengaturanInstansi } from '../types/slks';
 import { getPangkatName } from '../data/pangkatData';
-import { Printer, FileSpreadsheet, Download, Table2 } from 'lucide-react';
-import { exportToCSV10Kolom, exportToExcel10Kolom, prepareBKNRows } from '../utils/exportBKN';
+import { Printer, Download, Table2 } from 'lucide-react';
+import { exportToCSV10Kolom, prepareBKNRows } from '../utils/exportBKN';
+import { sortUsulanList } from '../utils/storage';
 
 interface CetakDokumenProps {
   usulanList: UsulanSLKS[];
@@ -16,12 +17,14 @@ export const CetakDokumen: React.FC<CetakDokumenProps> = ({
 }) => {
   const [filterTingkatDoc, setFilterTingkatDoc] = useState<'ALL' | 'X' | 'XX' | 'XXX'>('ALL');
 
-  // Filter usulan yang Memenuhi Syarat (MS) untuk tabel usulan
-  const msList = usulanList.filter((u) => {
-    const isMS = u.statusKelayakan === 'MS';
-    const matchTingkat = filterTingkatDoc === 'ALL' || u.slksUsul === filterTingkatDoc;
-    return isMS && matchTingkat;
-  });
+  // Filter usulan yang Memenuhi Syarat (MS) dengan pengurutan resmi (SLKS 30>10, Pangkat tertinggi>terendah, Umur tertua>termuda)
+  const msList = sortUsulanList(
+    usulanList.filter((u) => {
+      const isMS = u.statusKelayakan === 'MS';
+      const matchTingkat = filterTingkatDoc === 'ALL' || u.slksUsul === filterTingkatDoc;
+      return isMS && matchTingkat;
+    })
+  );
 
   const handlePrint = () => {
     window.print();
@@ -33,15 +36,6 @@ export const CetakDokumen: React.FC<CetakDokumenProps> = ({
     exportToCSV10Kolom(
       rows,
       `Nominatif_SLKS_10_Kolom_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-  };
-
-  // Unduh Excel (.xls dengan mso-number-format: "\@" agar tipe sel NIP absolut Teks)
-  const handleExportExcel = () => {
-    const rows = prepareBKNRows(msList, pengaturan);
-    exportToExcel10Kolom(
-      rows,
-      `Nominatif_SLKS_10_Kolom_${new Date().toISOString().slice(0, 10)}.xls`
     );
   };
 
@@ -58,23 +52,9 @@ export const CetakDokumen: React.FC<CetakDokumenProps> = ({
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mt-1">
               CETAK TABEL USULAN & EKSPOR DATA
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Tampilan murni tabel nominatif usulan (tanpa kop, tanpa lampiran surat, tanpa catatan PPK) sesuai format standar.
-            </p>
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-            {/* Tombol Unduh Excel Format Teks */}
-            <button
-              type="button"
-              onClick={handleExportExcel}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
-              title="Unduh file Excel (.xls) dengan format Teks sehingga NIP 18 digit tidak akan berubah menjadi notasi ilmiah"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-100" />
-              <span>Unduh Excel (.xls - NIP Teks)</span>
-            </button>
-
             {/* Tombol Unduh CSV Format Teks */}
             <button
               type="button"

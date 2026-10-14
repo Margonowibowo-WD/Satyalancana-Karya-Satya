@@ -362,167 +362,130 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-3 space-y-2.5 sm:space-y-3">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-teal-900 to-emerald-900 text-white px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-3 border border-teal-500/40 animate-fade-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-teal-900 to-emerald-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-teal-500/40 animate-fade-in">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span className="text-sm font-semibold">{toastMessage}</span>
+          <span className="text-xs sm:text-sm font-semibold">{toastMessage}</span>
         </div>
       )}
 
-      {/* Modern Hero Header with Dynamic Regional Identity */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-800 via-teal-900 to-emerald-950 text-white p-6 sm:p-7 shadow-md">
-        {/* Subtle Decorative Elements */}
-        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute right-1/4 -top-10 w-48 h-48 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+      {/* Sleek Compact Header (Tulisan Panjang Dihapus Sesuai Permintaan User #4) */}
+      <div className="rounded-xl bg-gradient-to-r from-teal-800 via-teal-900 to-emerald-950 text-white px-4 py-2.5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-xs sm:text-sm font-extrabold tracking-tight uppercase text-white">
+            INPUT DATA USUL SATYALANCANA KARYA SATYA
+          </h1>
+          <span className="text-teal-300/60 hidden sm:inline">·</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-teal-700/60 border border-teal-500/40 text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-teal-200">
+            {kabKota || instansi}, Prov. {provinsi} (Kode: {kdWil})
+          </span>
+          {onNavigateToMaster && (
+            <button
+              type="button"
+              onClick={onNavigateToMaster}
+              className="text-[10px] text-amber-300 hover:text-amber-200 underline font-semibold ml-0.5 cursor-pointer"
+            >
+              (Ubah Wilayah)
+            </button>
+          )}
+        </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-teal-700/60 border border-teal-500/40 text-[11px] font-bold tracking-wider uppercase text-teal-200">
-                {instansi || 'Pemerintah Daerah / Kementerian'}
-              </span>
-              <span className="text-teal-300/60 text-xs">·</span>
-              <span className="text-xs text-teal-200 font-medium">
-                {kabKota}, Prov. {provinsi} (Kode: {kdWil})
-              </span>
-              {onNavigateToMaster && (
-                <button
-                  type="button"
-                  onClick={onNavigateToMaster}
-                  className="text-[11px] text-amber-300 hover:text-amber-200 underline font-semibold ml-1 cursor-pointer"
-                >
-                  (Ubah Wilayah)
-                </button>
-              )}
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              INPUT DATA USUL SATYALANCANA KARYA SATYA
-            </h1>
-            <p className="text-xs sm:text-sm text-teal-100/90 max-w-2xl leading-relaxed">
-              Formulir terpadu pengusulan tanda kehormatan 10, 20, dan 30 Tahun bagi ASN di lingkungan {instansi} dengan penghitungan masa kerja dan validasi kelayakan otomatis.
-            </p>
-          </div>
-
-          <div className="shrink-0 flex items-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-teal-100 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Validasi PP No. 35/2010</span>
-            </span>
-          </div>
+        <div className="shrink-0 flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/20 text-[10px] sm:text-[11px] font-semibold text-teal-100 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Validasi PP No. 35/2010</span>
+          </span>
         </div>
       </div>
 
-      {/* Main Interactive Form Grid */}
-      <form onSubmit={handleSimpan} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Main Interactive Form Grid (Rapi & Kompak: 1 Halaman Desktop Tampa Scroll Sesuai User #1) */}
+      <form onSubmit={handleSimpan} className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
         {/* Kolom Kiri (Lg: 7 col): PENCARIAN NIP, BIODATA PEGAWAI & AUDIT INTEGRITAS */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-2.5">
 
           {/* Card: CARI / MUAT NIP PEGAWAI (TEPAT DI ATAS BIODATA SESUAI PERMINTAAN USER #5) */}
-          <div className="bg-gradient-to-r from-teal-900 via-teal-850 to-emerald-900 text-white rounded-2xl p-5 shadow-sm border border-teal-700/50 relative">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold">
-                  <Search className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-teal-100 flex items-center gap-2">
-                    <span>Cari / Muat NIP Pegawai:</span>
-                    <span className="text-[10px] bg-teal-700/70 text-teal-200 px-2 py-0.5 rounded-full font-normal">
-                      Pencarian Cepat
-                    </span>
-                  </h3>
-                  <p className="text-[11px] text-teal-200/80">
-                    Masukkan 18 digit NIP atau nama pegawai untuk memuat data & kalkulasi otomatis
-                  </p>
-                </div>
+          <div className="bg-gradient-to-r from-teal-900 via-teal-850 to-emerald-900 text-white rounded-xl p-2.5 sm:p-3 shadow-xs border border-teal-700/50 relative">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 font-bold">
+                <Search className="w-3.5 h-3.5" />
               </div>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={searchNip}
+                  onChange={handleSearchInputChange}
+                  placeholder="Ketik 18 digit NIP atau nama pegawai untuk memuat data otomatis..."
+                  className="w-full pl-3 pr-8 py-1.5 bg-white text-slate-900 placeholder:text-slate-400 rounded-lg text-xs sm:text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-xs"
+                />
+                {searchNip && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchNip('')}
+                    className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => handleNipChange(searchNip)}
+                className="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-xs font-extrabold shadow-xs hover:shadow transition-all cursor-pointer shrink-0"
+              >
+                Muat Data
+              </button>
             </div>
 
-            <div className="relative">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={searchNip}
-                    onChange={handleSearchInputChange}
-                    placeholder="Ketik 18 digit NIP atau nama pegawai..."
-                    className="w-full pl-3.5 pr-10 py-2.5 bg-white text-slate-900 placeholder:text-slate-400 rounded-xl text-xs sm:text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-sm"
-                  />
-                  {searchNip && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchNip('')}
-                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleNipChange(searchNip)}
-                  className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm hover:shadow transition-all cursor-pointer shrink-0"
-                >
-                  Muat Data
-                </button>
-              </div>
-
-              {/* Dropdown Hasil Pencarian Auto-complete */}
-              {showDropdown && filteredPegawai.length > 0 && (
-                <div className="absolute z-40 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-60 overflow-y-auto divide-y divide-slate-100 text-slate-800">
-                  {filteredPegawai.map((p) => (
-                    <button
-                      key={p.nip}
-                      type="button"
-                      onClick={() => fillPegawaiData(p)}
-                      className="w-full px-4 py-2.5 text-left hover:bg-teal-50 transition-colors flex items-center justify-between gap-3 cursor-pointer"
-                    >
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">{p.nama}</div>
-                        <div className="text-[11px] text-slate-500 font-mono">
-                          {p.nip} · {p.kdPangkat} · {p.jabatan}
-                        </div>
+            {/* Dropdown Hasil Pencarian Auto-complete */}
+            {showDropdown && filteredPegawai.length > 0 && (
+              <div className="absolute z-40 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-slate-100 text-slate-800">
+                {filteredPegawai.map((p) => (
+                  <button
+                    key={p.nip}
+                    type="button"
+                    onClick={() => fillPegawaiData(p)}
+                    className="w-full px-3 py-2 text-left hover:bg-teal-50 transition-colors flex items-center justify-between gap-3 cursor-pointer"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">{p.nama}</div>
+                      <div className="text-[11px] text-slate-500 font-mono">
+                        {p.nip} · {p.kdPangkat} · {p.jabatan}
                       </div>
-                      <span className="text-[11px] text-teal-800 bg-teal-50 px-2.5 py-1 rounded-md font-bold border border-teal-200 shrink-0">
-                        Pilih & Muat
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                    </div>
+                    <span className="text-[10px] text-teal-800 bg-teal-50 px-2 py-0.5 rounded font-bold border border-teal-200 shrink-0">
+                      Pilih & Muat
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Card: BIODATA PEGAWAI */}
-          <div className="bg-white border border-teal-100/80 rounded-2xl p-6 shadow-xs space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-200 text-teal-800 flex items-center justify-center font-bold">
-                  <User className="w-4 h-4" />
+          <div className="bg-white border border-teal-100/80 rounded-xl p-3 sm:p-3.5 shadow-xs space-y-2.5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-teal-50 border border-teal-200 text-teal-800 flex items-center justify-center font-bold">
+                  <User className="w-3.5 h-3.5" />
                 </div>
-                <div>
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900">
-                    BIODATA PEGAWAI:
-                  </h2>
-                  <span className="text-[11px] text-slate-500">
-                    Data Kepegawaian Aparatur Sipil Negara
-                  </span>
-                </div>
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">
+                  BIODATA PEGAWAI
+                </h2>
               </div>
 
               {nip && (
-                <span className="text-xs font-mono text-teal-900 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-md font-semibold">
+                <span className="text-[11px] font-mono text-teal-900 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded font-semibold">
                   NIP: {nip}
                 </span>
               )}
             </div>
 
             {/* NIP & Pangkat */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
                   NIP (Nomor Induk Pegawai) *
                 </label>
                 <input
@@ -531,22 +494,19 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
                   maxLength={18}
                   value={nip}
                   onChange={(e) => handleNipChange(e.target.value)}
-                  placeholder="198501012010011001"
-                  className="w-full px-3.5 py-2.5 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 rounded-xl text-sm font-mono tracking-wider outline-none bg-slate-50 focus:bg-white transition-all text-slate-900"
+                  placeholder="18 digit NIP BKN"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs font-mono tracking-wider outline-none bg-slate-50 focus:bg-white transition-all text-slate-900 font-bold"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  18 digit NIP BKN (otomatis mengisi tanggal lahir & TMT)
-                </p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
                   Pangkat & Golongan Ruang *
                 </label>
                 <select
                   value={kdPangkat}
                   onChange={(e) => setKdPangkat(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 rounded-xl text-xs sm:text-sm outline-none bg-white font-medium text-slate-800 transition-all"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs outline-none bg-white font-medium text-slate-800 transition-all"
                 >
                   {DAFTAR_PANGKAT_GOLONGAN.map((item) => (
                     <option key={item.kode} value={item.kode}>
@@ -559,7 +519,7 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
 
             {/* Nama Pegawai */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
                 Nama Pegawai (Lengkap dengan Gelar) *
               </label>
               <input
@@ -567,133 +527,135 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
                 required
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
-                placeholder="Contoh: Dr. H. Ahmad Fauzi, M.Si."
-                className="w-full px-3.5 py-2.5 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 rounded-xl text-sm outline-none font-semibold text-slate-900 transition-all"
+                placeholder="Nama lengkap pegawai beserta gelar"
+                className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs sm:text-sm outline-none font-semibold text-slate-900 transition-all"
               />
             </div>
 
-            {/* Jabatan */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Jabatan *
-              </label>
-              <textarea
-                rows={2}
-                required
-                value={jabatan}
-                onChange={(e) => setJabatan(e.target.value)}
-                placeholder="Contoh: Kepala Subbagian Kepegawaian dan Umum / Guru Ahli Madya / Pranata Komputer Ahli Muda"
-                className="w-full px-3.5 py-2 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 rounded-xl text-sm outline-none resize-none transition-all text-slate-800"
-              />
-            </div>
-
-            {/* Unit Kerja (Lebar & Besar Seperti Jabatan, Instansi Dihilangkan Sesuai Permintaan) */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Unit Kerja *
-              </label>
-              <textarea
-                rows={2}
-                value={unitKerja}
-                onChange={(e) => setUnitKerja(e.target.value)}
-                placeholder="Contoh: Badan Kepegawaian dan Pengembangan Sumber Daya Manusia / Dinas Kesehatan / SMAN 1"
-                className="w-full px-3.5 py-2 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 rounded-xl text-sm outline-none resize-none transition-all text-slate-800"
-              />
-            </div>
-
-            {/* Wilayah Administrasi (Kabupaten, Provinsi, Kode Wilayah) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100">
+            {/* Jabatan & Unit Kerja (Berdampingan Sama Besar) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Kabupaten:
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+                  Jabatan *
                 </label>
                 <input
                   type="text"
-                  value={kabKota}
-                  onChange={(e) => setKabKota(e.target.value)}
-                  placeholder="Kabupaten Mukomuko"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-teal-600"
+                  required
+                  value={jabatan}
+                  onChange={(e) => setJabatan(e.target.value)}
+                  placeholder="Nama jabatan"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs outline-none transition-all text-slate-800"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Provinsi:
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+                  Unit Kerja *
                 </label>
                 <input
                   type="text"
-                  value={provinsi}
-                  onChange={(e) => setProvinsi(e.target.value)}
-                  placeholder="Bengkulu"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-teal-600"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Kode Wilayah:
-                </label>
-                <input
-                  type="text"
-                  value={kdWil}
-                  onChange={(e) => setKdWil(e.target.value)}
-                  placeholder="17.06"
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-teal-600 font-bold"
+                  value={unitKerja}
+                  onChange={(e) => setUnitKerja(e.target.value)}
+                  placeholder="Unit kerja"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs outline-none transition-all text-slate-800"
                 />
               </div>
             </div>
 
-            {/* Audit Integritas: No. SK Hukdis & No. SK CLTN (Tingkat Hukdis & Potongan Bulan Dihapus) */}
-            <div className="pt-3 border-t border-slate-100 space-y-3">
-              <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">
-                  <ShieldCheck className="w-4 h-4 text-amber-700" />
-                  Keterangan Disiplin & CLTN (PP 35/2010 Pasal 22):
+            {/* Wilayah Administrasi (Kabupaten, Provinsi, Kode Wilayah TERKUNCI Sesuai Permintaan User #3) */}
+            <div className="pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-bold text-slate-700">Wilayah Administrasi:</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded font-semibold border border-amber-200">
+                  <Lock className="w-2.5 h-2.5 text-amber-600" /> Terkunci (Data Master)
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[10px] font-medium text-slate-500 mb-0.5">Kabupaten</label>
+                  <input
+                    type="text"
+                    readOnly
+                    disabled
+                    value={kabKota}
+                    className="w-full px-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 cursor-not-allowed outline-none"
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
+                <div>
+                  <label className="block text-[10px] font-medium text-slate-500 mb-0.5">Provinsi</label>
+                  <input
+                    type="text"
+                    readOnly
+                    disabled
+                    value={provinsi}
+                    className="w-full px-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 cursor-not-allowed outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-medium text-slate-500 mb-0.5">Kode Wilayah</label>
+                  <input
+                    type="text"
+                    readOnly
+                    disabled
+                    value={kdWil}
+                    className="w-full px-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-700 cursor-not-allowed outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Audit Integritas: No. SK Hukdis & No. SK CLTN */}
+            <div className="pt-1.5 border-t border-slate-100">
+              <div className="bg-amber-50/70 border border-amber-200/90 rounded-lg p-2.5 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-900 uppercase tracking-wider">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Keterangan Disiplin & CLTN (PP 35/2010):</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
                   <div className="sm:col-span-7">
-                    <label className="block font-semibold text-slate-700 mb-1">No. SK Hukdis:</label>
+                    <label className="block text-[10px] font-semibold text-slate-700 mb-0.5">No. SK Hukdis:</label>
                     <input
                       type="text"
                       value={noSkHukdis}
                       onChange={(e) => setNoSkHukdis(e.target.value)}
-                      placeholder="Kosongkan jika tidak pernah dijatuhi hukuman disiplin"
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-amber-600"
+                      placeholder="Kosongkan jika tidak ada"
+                      className="w-full px-2 py-1 bg-white border border-slate-300 rounded-md text-xs font-mono outline-none focus:border-amber-600"
                     />
                   </div>
 
                   <div className="sm:col-span-5">
-                    <label className="block font-semibold text-slate-700 mb-1">TMT Hukdis:</label>
+                    <label className="block text-[10px] font-semibold text-slate-700 mb-0.5">TMT Hukdis:</label>
                     <input
                       type="date"
                       value={tmtHukdis}
                       onChange={(e) => setTmtHukdis(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-amber-600"
+                      className="w-full px-2 py-1 bg-white border border-slate-300 rounded-md text-xs font-mono outline-none focus:border-amber-600"
                     />
                   </div>
                 </div>
 
-                {/* No. SK CLTN */}
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs mt-3 pt-3 border-t border-amber-200/60">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs pt-1.5 border-t border-amber-200/60">
                   <div className="sm:col-span-7">
-                    <label className="block font-semibold text-slate-700 mb-1">No. SK CLTN:</label>
+                    <label className="block text-[10px] font-semibold text-slate-700 mb-0.5">No. SK CLTN:</label>
                     <input
                       type="text"
                       value={noSkCltn}
                       onChange={(e) => setNoSkCltn(e.target.value)}
-                      placeholder="Kosongkan jika tidak pernah cuti di luar tanggungan negara"
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-amber-600"
+                      placeholder="Kosongkan jika tidak ada"
+                      className="w-full px-2 py-1 bg-white border border-slate-300 rounded-md text-xs font-mono outline-none focus:border-amber-600"
                     />
                   </div>
 
                   <div className="sm:col-span-5">
-                    <label className="block font-semibold text-slate-700 mb-1">TMT CLTN:</label>
+                    <label className="block text-[10px] font-semibold text-slate-700 mb-0.5">TMT CLTN:</label>
                     <input
                       type="date"
                       value={tmtCltn}
                       onChange={(e) => setTmtCltn(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-amber-600"
+                      className="w-full px-2 py-1 bg-white border border-slate-300 rounded-md text-xs font-mono outline-none focus:border-amber-600"
                     />
                   </div>
                 </div>
@@ -702,124 +664,107 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
           </div>
         </div>
 
-        {/* Kolom Kanan (Lg: 5 col): PERHITUNGAN MASA KERJA (TERPADU DENGAN TMT CPNS, LAHIR, JK), SLKS LAMA, USULAN & EVALUASI */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Card: TMT CPNS, TANGGAL LAHIR, JENIS KELAMIN & PERHITUNGAN MASA KERJA (TERKUNCI SESUAI PERMINTAAN USER #4) */}
-          <div className="bg-gradient-to-br from-white to-teal-50/50 border border-teal-200 rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-teal-100 pb-2.5">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-teal-800 text-teal-100 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-amber-300" />
+        {/* Kolom Kanan (Lg: 5 col): PERHITUNGAN MASA KERJA (TERKUNCI), SLKS LAMA, USULAN & SIMPAN */}
+        <div className="lg:col-span-5 space-y-2.5">
+          {/* Card: TMT CPNS, TANGGAL LAHIR, JENIS KELAMIN & PERHITUNGAN MASA KERJA (TERKUNCI) */}
+          <div className="bg-gradient-to-br from-white to-teal-50/50 border border-teal-200 rounded-xl p-3 sm:p-3.5 shadow-xs space-y-2">
+            <div className="flex items-center justify-between border-b border-teal-100 pb-1.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-md bg-teal-800 text-teal-100 flex items-center justify-center">
+                  <Clock className="w-3.5 h-3.5 text-amber-300" />
                 </div>
-                <div>
-                  <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">
-                    TMT CPNS & PERHITUNGAN MASA KERJA
-                  </h2>
-                  <span className="text-[10px] text-teal-700 font-medium">
-                    Kelahiran, Pengangkatan & Akumulasi Pengabdian
-                  </span>
-                </div>
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">
+                  TMT CPNS & MASA KERJA
+                </h2>
               </div>
 
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                <Lock className="w-3 h-3 text-amber-600" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                <Lock className="w-2.5 h-2.5 text-amber-600" />
                 Terkunci (Otomatis dari NIP)
               </span>
             </div>
 
-            {/* Banner Keterangan Blok Terkunci */}
-            <div className="text-[11px] text-slate-600 bg-slate-100/80 px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span>Data kelahiran & TMT CPNS terkunci otomatis dari 18 digit NIP pegawai untuk menjaga akurasi masa kerja.</span>
-            </div>
-
-            {/* Input Tanggal Lahir & Jenis Kelamin (Terkunci / Readonly) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            {/* Input Tanggal Lahir & Jenis Kelamin (TIDAK PERLU DROPDOWN SESUAI PERMINTAAN USER #2) */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Tanggal Lahir</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Tanggal Lahir</label>
                 <input
                   type="date"
                   readOnly
                   disabled
                   value={tanggalLahir}
-                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg text-xs font-mono bg-slate-100 text-slate-700 cursor-not-allowed outline-none font-semibold"
+                  className="w-full px-2 py-1 border border-slate-200 rounded-lg text-xs font-mono bg-slate-100 text-slate-700 cursor-not-allowed outline-none font-semibold"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Jenis Kelamin</label>
-                <select
-                  disabled
-                  value={jenisKelamin}
-                  className="w-full px-2.5 py-2 border border-slate-200 rounded-lg text-xs bg-slate-100 text-slate-700 cursor-not-allowed outline-none font-semibold"
-                >
-                  <option value="Laki-laki">Laki-laki</option>
-                  <option value="Perempuan">Perempuan</option>
-                </select>
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Jenis Kelamin</label>
+                <div className="w-full px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 flex items-center justify-between">
+                  <span>{jenisKelamin || 'Laki-laki'}</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Dari NIP</span>
+                </div>
               </div>
             </div>
 
             {/* Input TMT CPNS (Terkunci / Readonly) */}
             <div className="text-xs">
-              <label className="block font-bold text-teal-900 mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-bold text-teal-900 mb-0.5 flex items-center justify-between">
                 <span>TMT CPNS (Pengangkatan Awal)</span>
                 <span className="text-[10px] text-teal-700 font-medium">Masa kerja dihitung sejak TMT ini</span>
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  readOnly
-                  disabled
-                  value={tmtCpns}
-                  className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono font-bold text-teal-950 cursor-not-allowed outline-none"
-                />
-              </div>
+              <input
+                type="date"
+                readOnly
+                disabled
+                value={tmtCpns}
+                className="w-full px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-bold text-teal-950 cursor-not-allowed outline-none"
+              />
             </div>
 
             {/* Kotak Hasil Perhitungan Masa Kerja Otomatis */}
-            <div className="grid grid-cols-2 gap-3 text-center pt-2">
-              <div className="p-3 bg-gradient-to-br from-teal-700 to-emerald-800 text-white rounded-xl shadow-xs">
+            <div className="grid grid-cols-2 gap-2 text-center pt-1">
+              <div className="p-2 bg-gradient-to-br from-teal-700 to-emerald-800 text-white rounded-lg shadow-xs">
                 <span className="text-[10px] uppercase font-bold text-teal-200 tracking-wider block">
                   mkpns (Masa Kerja PNS)
                 </span>
-                <div className="text-xl font-extrabold font-mono mt-0.5 tabular-nums drop-shadow-xs">
+                <div className="text-base sm:text-lg font-extrabold font-mono mt-0.5 tabular-nums drop-shadow-xs">
                   {mkPns.tahun} Thn {mkPns.bulan} Bln
                 </div>
                 <span className="text-[10px] text-teal-100 font-medium">
-                  Total: {mkPns.totalBulan} Bulan Pengabdian
+                  Total: {mkPns.totalBulan} Bulan
                 </span>
               </div>
 
-              <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs flex flex-col justify-center">
+              <div className="p-2 bg-white border border-slate-200 rounded-lg shadow-2xs flex flex-col justify-center">
                 <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
                   mkhukdis (Potongan Masa)
                 </span>
-                <div className="text-xl font-bold font-mono text-slate-800 mt-0.5 tabular-nums">
+                <div className="text-base sm:text-lg font-bold font-mono text-slate-800 mt-0.5 tabular-nums">
                   {mkHukdis.tahun} Thn {mkHukdis.bulan} Bln
                 </div>
                 <span className="text-[10px] text-slate-500">
-                  {noSkHukdis ? 'SK Hukdis Terdaftar' : 'Nihil (0 Bulan)'}
+                  {noSkHukdis ? 'SK Hukdis' : 'Nihil (0 Bulan)'}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Card: SLKS YANG SUDAH DIPEROLEH (Terakhir) */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs space-y-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-1">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
                 SLKS YANG SUDAH DIPEROLEH:
               </h2>
-              <span className="text-[11px] text-slate-500">Tanda Kehormatan Sebelumnya</span>
+              <span className="text-[10px] text-slate-500">Sebelumnya</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
               <div className="sm:col-span-4">
-                <label className="block text-slate-600 font-medium mb-1">Slks Lama:</label>
+                <label className="block text-[10px] text-slate-600 font-medium mb-0.5">Slks Lama:</label>
                 <select
                   value={slksLamaTingkat}
                   onChange={(e) => setSlksLamaTingkat(e.target.value as any)}
-                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs outline-none focus:bg-white"
+                  className="w-full px-2 py-1 bg-slate-50 border border-slate-300 rounded-md text-xs outline-none focus:bg-white"
                 >
                   <option value="">Belum Ada</option>
                   <option value="X">10 Tahun (X)</option>
@@ -828,140 +773,112 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
               </div>
 
               <div className="sm:col-span-5">
-                <label className="block text-slate-600 font-medium mb-1">No. Keppres:</label>
+                <label className="block text-[10px] text-slate-600 font-medium mb-0.5">No. Keppres:</label>
                 <input
                   type="text"
                   value={slksLamaNoKeppres}
                   onChange={(e) => setSlksLamaNoKeppres(e.target.value)}
                   placeholder="Contoh: No. 42/TK/2015"
-                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono outline-none focus:bg-white"
+                  className="w-full px-2 py-1 bg-slate-50 border border-slate-300 rounded-md text-xs font-mono outline-none focus:bg-white"
                 />
               </div>
 
               <div className="sm:col-span-3">
-                <label className="block text-slate-600 font-medium mb-1">Tgl Keppres:</label>
+                <label className="block text-[10px] text-slate-600 font-medium mb-0.5">Tgl Keppres:</label>
                 <input
                   type="date"
                   value={slksLamaTglKeppres}
                   onChange={(e) => setSlksLamaTglKeppres(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono outline-none focus:bg-white"
+                  className="w-full px-1.5 py-1 bg-slate-50 border border-slate-300 rounded-md text-xs font-mono outline-none focus:bg-white"
                 />
               </div>
             </div>
           </div>
 
-          {/* Card: SLKS YANG DIUSULKAN & KETERANGAN KELAYAKAN (DIRAPIKAN & DROPDOWN BULAN DIHILANGKAN SESUAI USER #2 & #3) */}
-          <div className="bg-white border border-teal-200/80 rounded-2xl p-5 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          {/* Card: SLKS YANG DIUSULKAN & KETERANGAN KELAYAKAN */}
+          <div className="bg-white border border-teal-200/80 rounded-xl p-3 sm:p-3.5 shadow-xs space-y-2.5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
               <h2 className="text-xs font-extrabold uppercase tracking-wider text-teal-950">
                 SLKS YANG DIUSULKAN:
               </h2>
               <MedalBadge tingkat={slksUsul} size="sm" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">SLKS Usulan *</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">SLKS Usulan *</label>
                 <select
                   value={slksUsul}
                   onChange={(e) => setSlksUsul(e.target.value as TingkatSLKS)}
-                  className="w-full px-3 py-2 border-2 border-teal-600 rounded-xl font-bold bg-teal-50/50 text-teal-950 text-xs outline-none"
+                  className="w-full px-2 py-1.5 border-2 border-teal-600 rounded-lg font-bold bg-teal-50/50 text-teal-950 text-xs outline-none"
                 >
-                  <option value="X">10 Tahun (X - Perunggu)</option>
-                  <option value="XX">20 Tahun (XX - Perak)</option>
-                  <option value="XXX">30 Tahun (XXX - Emas)</option>
+                  <option value="X">10 Thn (X)</option>
+                  <option value="XX">20 Thn (XX)</option>
+                  <option value="XXX">30 Thn (XXX)</option>
                 </select>
               </div>
 
-              {/* Bulan Pengusulan (Dropdown Dihilangkan Sesuai Permintaan User #3 - Tampil Teks Terkunci Bersih) */}
+              {/* Bulan Pengusulan (Terkunci dari Data Master) */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Bulan Pengusulan</label>
-                <div className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs flex items-center justify-between">
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Bulan Pengusulan</label>
+                <div className="w-full px-2 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs flex items-center justify-between">
                   <span className="font-bold text-slate-800">
                     {DAFTAR_BULAN.find((b) => b.value === bulanPengusulan)?.label || 'Agustus'}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded font-semibold border border-amber-200">
-                    <Lock className="w-2.5 h-2.5" /> Terkunci
-                  </span>
+                  <Lock className="w-2.5 h-2.5 text-slate-400" />
                 </div>
               </div>
 
-              {/* Tahun Pengusulan (Tampil Teks Terkunci Bersih) */}
+              {/* Tahun Pengusulan (Terkunci dari Data Master) */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Tahun Pengusulan</label>
-                <div className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs flex items-center justify-between">
+                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Tahun Pengusulan</label>
+                <div className="w-full px-2 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs flex items-center justify-between">
                   <span className="font-bold font-mono text-slate-800">
                     {tahunPengusulan}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded font-semibold border border-amber-200">
-                    <Lock className="w-2.5 h-2.5" /> Terkunci
-                  </span>
+                  <Lock className="w-2.5 h-2.5 text-slate-400" />
                 </div>
               </div>
             </div>
 
-            {/* Keterangan Penguncian & Pintasan ke Data Master */}
-            <div className="flex items-center justify-between text-[11px] text-slate-500 bg-amber-50/60 px-3 py-1.5 rounded-lg border border-amber-200/80">
-              <span>Bulan & Tahun Pengusulan terkunci otomatis dari Data Master agar seragam.</span>
-              {onNavigateToMaster && (
-                <button
-                  type="button"
-                  onClick={onNavigateToMaster}
-                  className="text-teal-800 hover:text-teal-950 font-bold underline cursor-pointer ml-1 shrink-0"
-                >
-                  Atur di Data Master
-                </button>
-              )}
-            </div>
-
-            {/* NOTIFIKASI KETERANGAN STATUS KELAYAKAN (GANTIKAN MS TMS RAW BOX SESUAI USER #2) */}
+            {/* NOTIFIKASI KETERANGAN STATUS KELAYAKAN (BERSIH & KOMPAK) */}
             {statusKelayakan === 'MS' ? (
-              <div className="p-4 rounded-xl bg-emerald-50/90 border border-emerald-300 text-emerald-950 space-y-1.5 shadow-2xs">
-                <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-900">
-                      Keterangan: Memenuhi Syarat (MS)
-                    </div>
-                    <p className="text-xs text-emerald-800 mt-0.5 leading-relaxed">
-                      Pegawai memenuhi syarat masa kerja ({mkPns.tahun} Tahun {mkPns.bulan} Bulan) untuk usulan SLKS {slksUsul} Tahun berpedoman pada PP No. 35/2010 Pasal 22 tanpa catatan hukuman disiplin.
-                    </p>
+              <div className="p-2.5 rounded-lg bg-emerald-50/90 border border-emerald-300 text-emerald-950 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                    Keterangan: Memenuhi Syarat (MS) - Masa Kerja {mkPns.tahun} Thn {mkPns.bulan} Bln
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-4 rounded-xl bg-rose-50/90 border border-rose-300 text-rose-950 space-y-1.5 shadow-2xs">
-                <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-rose-900">
-                      Keterangan: Belum Memenuhi Syarat (TMS)
-                    </div>
-                    <p className="text-xs text-rose-800 mt-0.5 leading-relaxed font-medium">
-                      {keteranganTms || 'Masa kerja belum mencapai batas minimal yang ditentukan untuk tanda kehormatan ini.'}
-                    </p>
+              <div className="p-2.5 rounded-lg bg-rose-50/90 border border-rose-300 text-rose-950 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <div className="text-xs font-bold uppercase tracking-wider text-rose-900">
+                    Keterangan: Belum Memenuhi Syarat (TMS) - {keteranganTms || 'Masa kerja belum mencapai syarat.'}
                   </div>
                 </div>
               </div>
             )}
 
             {/* Tombol SIMPAN & Reset */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+            <div className="pt-1 flex flex-col sm:flex-row items-center gap-2">
               <button
                 type="submit"
-                className="w-full sm:flex-1 py-3.5 px-4 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl text-sm font-extrabold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:flex-1 py-2.5 px-4 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
-                <span>SIMPAN</span>
+                <span>SIMPAN USULAN</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full sm:w-auto py-3.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full sm:w-auto py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                <span>Batal / Reset</span>
+                <span>Reset</span>
               </button>
             </div>
           </div>

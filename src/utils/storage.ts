@@ -102,17 +102,70 @@ export function deletePegawai(nip: string): Pegawai[] {
   return updated;
 }
 
+export function getPangkatRank(kdPangkat?: string): number {
+  if (!kdPangkat) return 0;
+  const weights: Record<string, number> = {
+    'IV/e': 17, 'IV/d': 16, 'IV/c': 15, 'IV/b': 14, 'IV/a': 13,
+    'III/d': 12, 'III/c': 11, 'III/b': 10, 'III/a': 9,
+    'II/d': 8, 'II/c': 7, 'II/b': 6, 'II/a': 5,
+    'I/d': 4, 'I/c': 3, 'I/b': 2, 'I/a': 1,
+  };
+  const clean = kdPangkat.trim().toUpperCase().replace(/\./g, '/');
+  if (weights[clean]) return weights[clean];
+  for (const k of Object.keys(weights)) {
+    if (clean.includes(k)) return weights[k];
+  }
+  return 0;
+}
+
+export function getSlksRank(tingkat?: string): number {
+  if (tingkat === 'XXX') return 3;
+  if (tingkat === 'XX') return 2;
+  if (tingkat === 'X') return 1;
+  return 0;
+}
+
+/**
+ * Urutan data yang telah diinput sesuai permintaan pengguna:
+ * 1. Usulan SLKS paling atas: 30 > 20 > 10 (XXX > XX > X)
+ * 2. Pangkat tertinggi > terendah (IV/e s.d I/a)
+ * 3. Umur dilihat dari NIP (tertua > termuda, tanggal lahir YYYYMMDD paling awal lebih dulu)
+ */
+export function sortUsulanList(list: UsulanSLKS[]): UsulanSLKS[] {
+  return [...list].sort((a, b) => {
+    // 1. Usulan SLKS: 30 > 20 > 10
+    const slksDiff = getSlksRank(b.slksUsul) - getSlksRank(a.slksUsul);
+    if (slksDiff !== 0) return slksDiff;
+
+    // 2. Pangkat tertinggi > terendah
+    const rankA = getPangkatRank(a.pegawai.kdPangkat);
+    const rankB = getPangkatRank(b.pegawai.kdPangkat);
+    if (rankB !== rankA) return rankB - rankA;
+
+    // 3. Umur dari 8 digit awal NIP (YYYYMMDD): tanggal lahir lebih awal = umur lebih tua
+    const birthA = a.pegawai.nip ? a.pegawai.nip.replace(/\D/g, '').slice(0, 8) : '99999999';
+    const birthB = b.pegawai.nip ? b.pegawai.nip.replace(/\D/g, '').slice(0, 8) : '99999999';
+    const birthDiff = birthA.localeCompare(birthB);
+    if (birthDiff !== 0) return birthDiff;
+
+    // 4. Nama Pegawai (A-Z)
+    return (a.pegawai.nama || '').localeCompare(b.pegawai.nama || '');
+  });
+}
+
 export function getUsulanList(): UsulanSLKS[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.USULAN);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(INITIAL_USULAN));
-      return INITIAL_USULAN;
+      const sortedInitial = sortUsulanList(INITIAL_USULAN);
+      localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(sortedInitial));
+      return sortedInitial;
     }
-    return JSON.parse(raw);
+    const parsed: UsulanSLKS[] = JSON.parse(raw);
+    return sortUsulanList(parsed);
   } catch (err) {
     console.error('Error loading usulan:', err);
-    return INITIAL_USULAN;
+    return sortUsulanList(INITIAL_USULAN);
   }
 }
 
@@ -126,19 +179,21 @@ export function saveUsulan(usulan: UsulanSLKS): UsulanSLKS[] {
   } else {
     updated = [usulan, ...current];
   }
-  localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(updated));
+  const sorted = sortUsulanList(updated);
+  localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(sorted));
 
   // Also ensure pegawai is saved
   savePegawai(usulan.pegawai);
 
-  return updated;
+  return sorted;
 }
 
 export function deleteUsulan(id: string): UsulanSLKS[] {
   const current = getUsulanList();
   const updated = current.filter((u) => u.id !== id);
-  localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(updated));
-  return updated;
+  const sorted = sortUsulanList(updated);
+  localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(sorted));
+  return sorted;
 }
 
 export function updateUsulanStatus(
@@ -161,8 +216,9 @@ export function updateUsulanStatus(
     }
     return u;
   });
-  localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(updated));
-  return updated;
+  const sorted = sortUsulanList(updated);
+  localStorage.setItem(STORAGE_KEYS.USULAN, JSON.stringify(sorted));
+  return sorted;
 }
 
 export function resetToSampleData(): { pegawai: Pegawai[]; usulan: UsulanSLKS[]; pengaturan: PengaturanInstansi } {

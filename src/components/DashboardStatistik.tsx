@@ -39,19 +39,9 @@ export const DashboardStatistik: React.FC<DashboardStatistikProps> = ({
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mt-1">
               STATISTIK PENGUSULAN SATYALANCANA KARYA SATYA
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Ringkasan kelayakan administrasi, sebaran jenjang tanda kehormatan, dan kepatuhan PP No. 35 Tahun 2010.
-            </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={onNavigateToForm}
-              className="px-4 py-2 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
-            >
-              + Usul Pegawai Baru
-            </button>
             <button
               type="button"
               onClick={onNavigateToList}

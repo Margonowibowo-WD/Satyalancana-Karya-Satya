@@ -19,11 +19,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-teal-100 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-6 h-18">
+        <div className="flex items-center justify-between gap-4 h-14 sm:h-15">
           {/* Zone 1: Nationwide Brand */}
-          <div className="flex items-center gap-3.5 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-700 via-emerald-800 to-teal-900 text-amber-300 flex items-center justify-center font-bold shadow-md ring-2 ring-teal-500/20">
-              <Award className="w-5 h-5 text-amber-300 drop-shadow-xs" />
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-teal-700 via-emerald-800 to-teal-900 text-amber-300 flex items-center justify-center font-bold shadow-md ring-2 ring-teal-500/20">
+              <Award className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 drop-shadow-xs" />
             </div>
             <div className="leading-tight">
               <div className="flex items-center gap-2">

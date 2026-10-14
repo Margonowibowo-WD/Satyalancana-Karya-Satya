@@ -187,7 +187,7 @@ export default function App() {
       </div>
 
       {/* Main View Router */}
-      <main className="flex-1 pb-16">
+      <main className="flex-1 pb-2 sm:pb-4">
         {activeTab === 'input' && (
           <FormUsulanSLKS
             pegawaiList={pegawaiList}
@@ -245,18 +245,18 @@ export default function App() {
       </main>
 
       {/* Modern Fresh Footer - Credit to Margono Wibowo located exclusively at the very bottom */}
-      <footer className="bg-white/90 backdrop-blur-md border-t border-teal-100 py-6 text-xs text-slate-600 no-print mt-auto shadow-inner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-teal-800 text-amber-300 flex items-center justify-center font-bold shadow-xs">
-              <Award className="w-4 h-4" />
+      <footer className="bg-white/95 backdrop-blur-md border-t border-teal-100 py-2 sm:py-2.5 text-xs text-slate-600 no-print mt-auto shadow-inner">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-md bg-teal-800 text-amber-300 flex items-center justify-center font-bold shadow-xs shrink-0">
+              <Award className="w-3.5 h-3.5" />
             </div>
-            <div>
-              <div className="font-bold text-slate-900">
-                SI-SLKS NASIONAL · Sistem Pengusulan Satyalancana Karya Satya Republik Indonesia
+            <div className="text-left leading-tight">
+              <div className="font-bold text-[11px] sm:text-xs text-slate-900">
+                SI-SLKS NASIONAL · Pengusulan Satyalancana Karya Satya RI
               </div>
-              <div className="text-[11px] text-teal-800 font-medium">
-                Didesain & Dikembangkan oleh <strong>Margono Wibowo</strong> (BKPSDM Kabupaten Mukomuko) untuk ASN Seluruh Indonesia
+              <div className="text-[10px] text-teal-800 font-medium">
+                Didesain & Dikembangkan oleh <strong>Margono Wibowo</strong> (BKPSDM Kabupaten Mukomuko)
               </div>
             </div>
           </div>
