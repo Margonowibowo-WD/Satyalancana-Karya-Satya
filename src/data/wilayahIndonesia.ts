@@ -56,5 +56,7 @@ export const DEFAULT_PENGATURAN_INSTANSI = {
   kabKota: 'Kabupaten / Kota',
   provinsi: 'Provinsi',
   kdWil: '00.00',
+  bulanPengusulan: 8,
+  tahunPengusulan: 2026,
 };
 

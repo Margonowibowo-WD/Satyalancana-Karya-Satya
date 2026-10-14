@@ -88,5 +88,7 @@ export interface PengaturanInstansi {
   provinsi: string;     // contoh: Bengkulu / Jawa Barat / DKI Jakarta
   kdWil: string;        // contoh: 17.06
   googleSheetUrl?: string; // Optional URL Google Sheet terhubung
+  bulanPengusulan?: number; // 1 - 12 (default pengusulan)
+  tahunPengusulan?: number; // e.g. 2026
 }
 

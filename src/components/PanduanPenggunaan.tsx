@@ -268,14 +268,14 @@ export const PanduanPenggunaan: React.FC<PanduanPenggunaanProps> = ({
                 <tr className="text-slate-700">
                   <td className="px-3 py-2 font-mono">198506142010011002</td>
                   <td className="px-3 py-2 font-medium">Budi Santoso, S.STP.</td>
-                  <td className="px-3 py-2">III/c</td>
+                  <td className="px-3 py-2 font-semibold text-teal-900">Penata</td>
                   <td className="px-3 py-2">Kepala Subbagian Kepegawaian</td>
                   <td className="px-3 py-2">BKPSDM</td>
                 </tr>
                 <tr className="text-slate-700">
                   <td className="px-3 py-2 font-mono">197804121998032001</td>
                   <td className="px-3 py-2 font-medium">Dra. Hj. Siti Aminah, M.Pd.</td>
-                  <td className="px-3 py-2">IV/b</td>
+                  <td className="px-3 py-2 font-semibold text-teal-900">Pembina Tingkat I</td>
                   <td className="px-3 py-2">Guru Ahli Madya</td>
                   <td className="px-3 py-2">SMAN 1</td>
                 </tr>

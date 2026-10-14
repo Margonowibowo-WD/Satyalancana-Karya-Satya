@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pegawai, PengaturanInstansi } from '../types/slks';
 import { parseNIP, formatNIP } from '../utils/nipParser';
+import { getPangkatName, resolvePangkat, DAFTAR_BULAN } from '../data/pangkatData';
 import {
   Building2,
   FileSpreadsheet,
@@ -39,6 +40,8 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
   const [kabKota, setKabKota] = useState(pengaturan.kabKota || '');
   const [provinsi, setProvinsi] = useState(pengaturan.provinsi || '');
   const [kdWil, setKdWil] = useState(pengaturan.kdWil || '');
+  const [bulanPengusulan, setBulanPengusulan] = useState(pengaturan.bulanPengusulan || 8);
+  const [tahunPengusulan, setTahunPengusulan] = useState(pengaturan.tahunPengusulan || 2026);
 
   // Tab Impor: 'file' (Upload CSV/Excel) | 'link' (Link Google Sheet)
   const [importMode, setImportMode] = useState<'file' | 'link'>('file');
@@ -69,35 +72,73 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
       provinsi: provinsi.trim(),
       kdWil: kdWil.trim(),
       googleSheetUrl,
+      bulanPengusulan: Number(bulanPengusulan),
+      tahunPengusulan: Number(tahunPengusulan),
     };
     onSavePengaturan(updated);
-    triggerToast('success', 'Profil instansi dan wilayah berhasil disimpan!');
+    triggerToast('success', 'Profil instansi dan periode pengusulan berhasil disimpan!');
   };
 
   /**
-   * Parser data yang membaca 5 KOLOM SESUAI IMAGE.PNG:
+   * Helper untuk memecah baris CSV dengan memperhitungkan tanda kutip ganda ("..."),
+   * sehingga nama dengan koma gelar seperti "Dra. Hj. Siti Aminah, M.Pd." tidak pecah kolom.
+   */
+  const splitCsvLine = (line: string, sep: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === sep && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  /**
+   * Parser data yang membaca 5 KOLOM SESUAI FORMAT:
    * Kolom 1: NIP
    * Kolom 2: NAMA
-   * Kolom 3: PANGKAT
+   * Kolom 3: PANGKAT (Otomatis membaca nama pangkat seperti "Penata Muda", "Penata", "Pembina" atau golongannya)
    * Kolom 4: JABATAN
    * Kolom 5: UNIT_KERJA
    */
   const parseRowsToPegawai = (content: string, separator: string = ','): Pegawai[] => {
-    const lines = content
+    let lines = content
       .split(/\r?\n/)
       .map((l) => l.trim())
       .filter((l) => l.length > 0);
 
     if (lines.length === 0) return [];
 
+    // Jika baris pertama adalah penanda delimiter Excel (sep=, atau sep=;), lewati baris tersebut
+    if (lines[0].toLowerCase().startsWith('sep=')) {
+      lines = lines.slice(1);
+      if (lines.length === 0) return [];
+    }
+
     let sep = separator;
     if (lines[0].includes('\t')) sep = '\t';
     else if (lines[0].includes(';') && !lines[0].includes('\t')) sep = ';';
     else if (lines[0].includes(',') && !lines[0].includes('\t')) sep = ',';
 
-    const header = lines[0].toLowerCase().split(sep).map((h) => h.trim().replace(/^["']|["']$/g, ''));
+    const header = splitCsvLine(lines[0], sep).map((h) =>
+      h.toLowerCase().trim().replace(/^["']|["']$/g, '')
+    );
 
-    // Kolom mapping sesuai image.png
+    // Kolom mapping (NIP, NAMA, PANGKAT, JABATAN, UNIT_KERJA)
     let nipIdx = header.findIndex((h) => h.includes('nip'));
     let namaIdx = header.findIndex((h) => h.includes('nama'));
     let pangkatIdx = header.findIndex((h) => h.includes('pangkat') || h.includes('gol'));
@@ -114,7 +155,9 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
     const result: Pegawai[] = [];
 
     for (let i = startIdx; i < lines.length; i++) {
-      const parts = lines[i].split(sep).map((p) => p.trim().replace(/^["']|["']$/g, ''));
+      const parts = splitCsvLine(lines[i], sep).map((p) =>
+        p.trim().replace(/^["']|["']$/g, '')
+      );
       if (parts.length < 2) continue;
 
       const rawNip = (parts[nipIdx] || '').replace(/\D/g, '');
@@ -123,15 +166,18 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
 
       // Parsing otomatis NIP 18 Digit: tanggal lahir, jenis kelamin, dan TMT CPNS
       const nipInfo = parseNIP(rawNip);
-      const kdPangkat = parts[pangkatIdx] || 'III/a';
+      const rawPangkatInput = parts[pangkatIdx] || 'Penata';
+      
+      // Mengubah input pangkat (apakah kode "III/a" atau nama "Penata Muda") ke bentuk baku
+      const resolvedPangkat = resolvePangkat(rawPangkatInput);
       const jabatan = parts[jabatanIdx] || 'Pegawai Negeri Sipil';
       const unitKerja = parts[unitIdx] || 'Instansi Terkait';
 
       result.push({
         nip: rawNip,
         nama,
-        kdPangkat,
-        namaPangkat: 'Penata',
+        kdPangkat: resolvedPangkat.kode,
+        namaPangkat: resolvedPangkat.nama,
         jabatan,
         unitKerja,
         instansi: namaInstansi || 'Pemerintah Daerah',
@@ -225,27 +271,45 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
     }
   };
 
-  // Unduh Template Sesuai Format Persis image.png (5 Kolom: NIP, NAMA, PANGKAT, JABATAN, UNIT_KERJA)
+  // Unduh Template Sesuai Format Persis 5 Kolom: NIP, NAMA, PANGKAT, JABATAN, UNIT_KERJA
+  // Dilengkapi sep=, dan UTF-8 BOM agar langsung terpisah kolom kotak-kotak rapi di Excel tanpa numpuk
   const handleDownloadTemplate = () => {
     const header = ['NIP', 'NAMA', 'PANGKAT', 'JABATAN', 'UNIT_KERJA'];
     const sampleRows = [
-      ['198506142010011002', 'Budi Santoso, S.STP.', 'III/c', 'Kepala Subbagian Kepegawaian', 'BKPSDM'],
-      ['197804121998032001', 'Dra. Hj. Siti Aminah, M.Pd.', 'IV/b', 'Guru Ahli Madya', 'SMAN 1'],
-      ['199208202015021003', 'Hendra Wijaya, S.Kom.', 'III/b', 'Pranata Komputer Ahli Muda', 'Dinas Kominfo'],
+      ['198506142010011002', 'Budi Santoso, S.STP.', 'Penata', 'Kepala Subbagian Kepegawaian', 'BKPSDM'],
+      ['197804121998032001', 'Dra. Hj. Siti Aminah, M.Pd.', 'Pembina Tingkat I', 'Guru Ahli Madya', 'SMAN 1'],
+      ['199208202015021003', 'Hendra Wijaya, S.Kom.', 'Penata Muda Tingkat I', 'Pranata Komputer Ahli Muda', 'Dinas Kominfo'],
+      ['198901232011022001', 'Nurul Hidayati, S.E.', 'Penata Muda', 'Bendahara Pengeluaran', 'Badan Keuangan Daerah'],
+      ['197203111993031002', 'Drs. H. Bambang Irawan, M.Si.', 'Pembina Utama Muda', 'Sekretaris Badan', 'Inspektorat Daerah'],
     ];
 
-    const csvContent =
-      'data:text/csv;charset=utf-8,\uFEFF' +
-      [header.join(','), ...sampleRows.map((r) => r.map((c) => `"${c}"`).join(','))].join('\n');
+    // Menghasilkan CSV dengan format standar RFC-4180 dan penanda sep=, untuk Excel
+    const formatCell = (val: string) => {
+      if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+        return `"${val.replace(/"/g, '""')}"`;
+      }
+      return val;
+    };
 
-    const encodedUri = encodeURI(csvContent);
+    const csvLines = [
+      'sep=,',
+      header.map(formatCell).join(','),
+      ...sampleRows.map((row) => row.map(formatCell).join(',')),
+    ];
+
+    const blob = new Blob(['\uFEFF' + csvLines.join('\r\n')], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'Template_Pegawai_5_Kolom.csv');
+    link.href = url;
+    link.download = 'Template_Pegawai_5_Kolom.csv';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    triggerToast('success', 'Template 5 kolom (NIP, NAMA, PANGKAT, JABATAN, UNIT_KERJA) berhasil diunduh!');
+    URL.revokeObjectURL(url);
+
+    triggerToast('success', 'Template 5 kolom (NIP, NAMA, PANGKAT, JABATAN, UNIT_KERJA) berhasil diunduh dalam kotak-kotak Excel!');
   };
 
   // Filter Master Pegawai
@@ -396,13 +460,54 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
               />
             </div>
 
+            {/* Periode Pengusulan Default (Terkunci di Form Input Usul) */}
+            <div className="pt-2 border-t border-slate-100">
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-teal-900 mb-1">
+                PERIODE PENGUSULAN DEFAULT (NASIONAL / INSTANSI)
+              </label>
+              <p className="text-[11px] text-slate-500 mb-2.5 leading-relaxed">
+                Nilai bulan dan tahun ini akan otomatis mengunci isian formulir input usul agar seragam seluruh pegawai yang diusulkan.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Bulan Pengusulan:
+                  </label>
+                  <select
+                    value={bulanPengusulan}
+                    onChange={(e) => setBulanPengusulan(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-teal-600 bg-white"
+                  >
+                    {DAFTAR_BULAN.map((b) => (
+                      <option key={b.value} value={b.value}>
+                        {b.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Tahun Pengusulan:
+                  </label>
+                  <input
+                    type="number"
+                    min={2020}
+                    max={2035}
+                    value={tahunPengusulan}
+                    onChange={(e) => setTahunPengusulan(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono font-bold outline-none focus:border-teal-600"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="pt-2">
               <button
                 type="submit"
                 className="w-full py-3 px-4 bg-teal-800 hover:bg-teal-900 text-white font-bold rounded-xl text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
-                <span>Simpan Profil Instansi</span>
+                <span>Simpan Profil & Periode Pengusulan</span>
               </button>
             </div>
           </form>
@@ -584,7 +689,14 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
                       <td className="px-3 py-2 text-slate-400 font-mono tabular-nums">{idx + 1}</td>
                       <td className="px-3 py-2 font-mono font-semibold text-slate-900">{formatNIP(p.nip)}</td>
                       <td className="px-3 py-2 font-bold text-slate-800">{p.nama}</td>
-                      <td className="px-3 py-2 font-semibold text-teal-800">{p.kdPangkat}</td>
+                      <td className="px-3 py-2">
+                        <div className="font-bold text-teal-900">
+                          {getPangkatName(p.kdPangkat, p.namaPangkat)}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">
+                          Gol. {p.kdPangkat}
+                        </div>
+                      </td>
                       <td className="px-3 py-2 text-slate-600 truncate max-w-xs">{p.jabatan}</td>
                       <td className="px-3 py-2 text-slate-600 truncate max-w-xs">{p.unitKerja}</td>
                       <td className="px-3 py-2 text-right">
