@@ -1,7 +1,7 @@
 import React from 'react';
 import { Award, PlusCircle, Settings } from 'lucide-react';
 
-export type ActiveTab = 'input' | 'daftar' | 'cetak' | 'master' | 'panduan';
+export type ActiveTab = 'input' | 'daftar' | 'master' | 'panduan';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -63,17 +63,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               Daftar & Statistik
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('cetak')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                activeTab === 'cetak'
-                  ? 'bg-white text-teal-900 shadow-xs ring-1 ring-black/5'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              Cetak Dokumen
             </button>
             <button
               type="button"
@@ -139,17 +128,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             Daftar & Statistik
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('cetak')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap ${
-              activeTab === 'cetak'
-                ? 'bg-teal-700 text-white shadow-xs'
-                : 'text-slate-600'
-            }`}
-          >
-            Cetak
           </button>
           <button
             type="button"

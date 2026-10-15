@@ -31,7 +31,6 @@ interface TabelDaftarUsulanProps {
   usulanList: UsulanSLKS[];
   onEditUsulan: (usulan: UsulanSLKS) => void;
   onDeleteUsulan: (id: string) => void;
-  onCetakUsulan: (usulan: UsulanSLKS) => void;
   onUpdateStatusWorkflow?: (
     id: string,
     status: UsulanSLKS['statusUsulan'],
@@ -47,7 +46,6 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
   usulanList,
   onEditUsulan,
   onDeleteUsulan,
-  onCetakUsulan,
   onUpdateStatusWorkflow,
   pengaturan,
   onExportBackup,
@@ -442,10 +440,10 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
                   Jabatan & Unit Kerja
                 </th>
                 <th scope="col" className="px-3.5 py-3 text-center">
-                  Masa Kerja
+                  SLKS Usulan
                 </th>
                 <th scope="col" className="px-3.5 py-3 text-center">
-                  SLKS Usulan
+                  Masa Kerja
                 </th>
                 <th scope="col" className="px-3.5 py-3 text-center">
                   Kelayakan
@@ -499,7 +497,12 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
                       </div>
                     </td>
 
-                    {/* Masa Kerja */}
+                    {/* Usulan SLKS (Ditukar ke depan) */}
+                    <td className="px-3.5 py-3 text-center">
+                      <MedalBadge tingkat={item.slksUsul} size="sm" />
+                    </td>
+
+                    {/* Masa Kerja (Ditukar setelah SLKS) */}
                     <td className="px-3.5 py-3 text-center">
                       <span className="font-mono font-bold text-slate-900 text-xs tabular-nums">
                         {item.mkPnsTahun} Th {item.mkPnsBulan} Bl
@@ -509,11 +512,6 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
                           Ada SK Hukdis
                         </div>
                       )}
-                    </td>
-
-                    {/* Usulan SLKS */}
-                    <td className="px-3.5 py-3 text-center">
-                      <MedalBadge tingkat={item.slksUsul} size="sm" />
                     </td>
 
                     {/* Kelayakan MS / TMS */}
@@ -673,16 +671,6 @@ export const TabelDaftarUsulan: React.FC<TabelDaftarUsulanProps> = ({
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => {
-                  onCetakUsulan(detailModalUsulan);
-                  setDetailModalUsulan(null);
-                }}
-                className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
-              >
-                Cetak Blanko F-01
-              </button>
               <button
                 type="button"
                 onClick={() => setDetailModalUsulan(null)}

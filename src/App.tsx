@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { FormUsulanSLKS } from './components/FormUsulanSLKS';
 import { TabelDaftarUsulan } from './components/TabelDaftarUsulan';
-import { CetakDokumen } from './components/CetakDokumen';
 import { MasterPengaturan } from './components/MasterPengaturan';
 import { PanduanPenggunaan } from './components/PanduanPenggunaan';
 import {
@@ -26,7 +25,6 @@ export default function App() {
   const [usulanList, setUsulanList] = useState<UsulanSLKS[]>([]);
   const [pengaturan, setPengaturan] = useState<PengaturanInstansi>(getPengaturanInstansi());
   const [selectedUsulanForEdit, setSelectedUsulanForEdit] = useState<UsulanSLKS | null>(null);
-  const [activeUsulanForSinglePrint, setActiveUsulanForSinglePrint] = useState<UsulanSLKS | null>(null);
 
   // Load initial data from localStorage
   useEffect(() => {
@@ -50,12 +48,6 @@ export default function App() {
   const handleEditUsulan = (usulan: UsulanSLKS) => {
     setSelectedUsulanForEdit(usulan);
     setActiveTab('input');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleCetakUsulan = (usulan: UsulanSLKS) => {
-    setActiveUsulanForSinglePrint(usulan);
-    setActiveTab('cetak');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -194,7 +186,6 @@ export default function App() {
             onSaveUsulan={handleSaveUsulan}
             selectedUsulanForEdit={selectedUsulanForEdit}
             onClearEdit={() => setSelectedUsulanForEdit(null)}
-            onViewPrint={handleCetakUsulan}
             pengaturan={pengaturan}
             onNavigateToMaster={() => setActiveTab('master')}
           />
@@ -205,19 +196,10 @@ export default function App() {
             usulanList={usulanList}
             onEditUsulan={handleEditUsulan}
             onDeleteUsulan={handleDeleteUsulan}
-            onCetakUsulan={handleCetakUsulan}
             onUpdateStatusWorkflow={handleUpdateWorkflow}
             pengaturan={pengaturan}
             onExportBackup={handleExportBackup}
             onNavigateToInput={() => setActiveTab('input')}
-          />
-        )}
-
-        {activeTab === 'cetak' && (
-          <CetakDokumen
-            usulanList={usulanList}
-            activeUsulanForSinglePrint={activeUsulanForSinglePrint}
-            pengaturan={pengaturan}
           />
         )}
 

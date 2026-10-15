@@ -87,7 +87,10 @@ export interface PengaturanInstansi {
   kabKota: string;      // contoh: Kab. Mukomuko / Kota Bandung / Jakarta Pusat
   provinsi: string;     // contoh: Bengkulu / Jawa Barat / DKI Jakarta
   kdWil: string;        // contoh: 17.06
-  googleSheetUrl?: string; // Optional URL Google Sheet terhubung
+  googleSheetUrl?: string; // Optional URL Google Sheet untuk impor pegawai
+  googleAppsScriptUrl?: string; // URL Web App Google Apps Script untuk sinkronisasi usulan otomatis
+  targetSheetName?: string;     // Nama Sheet / OPD target (misal: "BKPSDM", "Dinas Pendidikan", dll)
+  autoSyncGoogleSheet?: boolean; // Kirim otomatis saat simpan usulan
   bulanPengusulan?: number; // 1 - 12 (default pengusulan)
   tahunPengusulan?: number; // e.g. 2026
 }

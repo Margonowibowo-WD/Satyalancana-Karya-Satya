@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Pegawai, PengaturanInstansi } from '../types/slks';
 import { parseNIP, formatNIP } from '../utils/nipParser';
 import { getPangkatName, resolvePangkat, DAFTAR_BULAN } from '../data/pangkatData';
+import { getGoogleAppsScriptTemplateCode } from '../utils/googleSheetsSync';
 import {
   Building2,
   FileSpreadsheet,
@@ -16,6 +17,13 @@ import {
   Users,
   Sparkles,
   ArrowRight,
+  Copy,
+  Check,
+  Code,
+  ExternalLink,
+  ShieldCheck,
+  HelpCircle,
+  Lock,
 } from 'lucide-react';
 
 interface MasterPengaturanProps {
@@ -46,9 +54,17 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
   // Tab Impor: 'file' (Upload CSV/Excel) | 'link' (Link Google Sheet)
   const [importMode, setImportMode] = useState<'file' | 'link'>('file');
 
-  // Input Google Sheet Link
+  // Input Google Sheet Link Impor
   const [googleSheetUrl, setGoogleSheetUrl] = useState(pengaturan.googleSheetUrl || '');
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
+
+  // Integrasi Google Apps Script Web App (Tampilan Web 1 tapi Sheet Masing-Masing OPD)
+  const [googleAppsScriptUrl, setGoogleAppsScriptUrl] = useState(pengaturan.googleAppsScriptUrl || '');
+  const [targetSheetName, setTargetSheetName] = useState(pengaturan.targetSheetName || '');
+  const [autoSyncGoogleSheet, setAutoSyncGoogleSheet] = useState(pengaturan.autoSyncGoogleSheet !== false);
+  const [showAppsScriptModal, setShowAppsScriptModal] = useState(false);
+  const [copiedScript, setCopiedScript] = useState(false);
+  const [isTestingScript, setIsTestingScript] = useState(false);
 
   // Status Notification Prominen
   const [toastNotif, setToastNotif] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -63,7 +79,7 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
     }, 4500);
   };
 
-  // Simpan Pengaturan Wilayah
+  // Simpan Pengaturan Wilayah & Apps Script
   const handleSimpanWilayah = (e: React.FormEvent) => {
     e.preventDefault();
     const updated: PengaturanInstansi = {
@@ -72,11 +88,65 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
       provinsi: provinsi.trim(),
       kdWil: kdWil.trim(),
       googleSheetUrl,
+      googleAppsScriptUrl: googleAppsScriptUrl.trim(),
+      targetSheetName: targetSheetName.trim(),
+      autoSyncGoogleSheet,
       bulanPengusulan: Number(bulanPengusulan),
       tahunPengusulan: Number(tahunPengusulan),
     };
     onSavePengaturan(updated);
-    triggerToast('success', 'Profil wilayah dan periode pengusulan berhasil disimpan!');
+    triggerToast('success', 'Profil wilayah & integrasi Google Sheet berhasil disimpan permanen!');
+  };
+
+  const handleTestAppsScript = async () => {
+    if (!googleAppsScriptUrl.trim()) {
+      triggerToast('error', 'Masukkan URL Web App Google Apps Script terlebih dahulu.');
+      return;
+    }
+    setIsTestingScript(true);
+    try {
+      const sheetName = targetSheetName.trim() || 'Uji Coba SI-SLKS';
+      const testPayload = {
+        action: 'tambahUsulan',
+        sheetName: sheetName,
+        waktuInput: new Date().toLocaleString('id-ID'),
+        nip: '198506142010011002',
+        nama: 'PEGAWAI UJI COBA KONEKSI, S.Kom.',
+        pangkat: 'Penata (III/c)',
+        jabatan: 'Pranata Komputer Ahli Muda',
+        unitKerja: sheetName,
+        slksUsul: 'X (10 Th)',
+        masaKerja: '14 Tahun 2 Bulan',
+        statusKelayakan: 'MS',
+        keteranganTms: '-',
+        slksLama: 'Belum Ada',
+        kabKota: kabKota || 'Kabupaten',
+        provinsi: provinsi || 'Provinsi',
+        kdWil: kdWil || '00.00',
+        tahunPengusulan: tahunPengusulan,
+      };
+
+      await fetch(googleAppsScriptUrl.trim(), {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(testPayload),
+      });
+
+      triggerToast('success', `Uji koneksi terkirim! Silakan periksa Google Sheet Anda pada tab/sheet "${sheetName}".`);
+    } catch (err: any) {
+      triggerToast('error', `Gagal mengirim uji coba: ${err?.message || 'Koneksi bermasalah'}`);
+    } finally {
+      setIsTestingScript(false);
+    }
+  };
+
+  const handleCopyScript = () => {
+    const code = getGoogleAppsScriptTemplateCode();
+    navigator.clipboard.writeText(code);
+    setCopiedScript(true);
+    setTimeout(() => setCopiedScript(false), 3000);
+    triggerToast('success', 'Kode Google Apps Script berhasil disalin ke clipboard!');
   };
 
   /**
@@ -497,6 +567,101 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
               </button>
             </div>
           </form>
+
+          {/* Card: INTEGRASI GOOGLE SHEET & APPS SCRIPT (MULTI-OPD) */}
+          <div className="bg-white border border-teal-200/90 rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold">
+                  <FileSpreadsheet className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900">
+                    SINKRONISASI GOOGLE SHEET (APPS SCRIPT)
+                  </h2>
+                  <span className="text-[11px] text-emerald-800 font-semibold">
+                    1 Tampilan Web · Tab Sheet Otomatis per OPD
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs text-emerald-950 space-y-1">
+              <div className="font-bold flex items-center gap-1.5 text-emerald-900">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                Solusi Multi-OPD & Anti Data Hilang:
+              </div>
+              <p className="text-[11px] text-emerald-800 leading-relaxed">
+                Tampilan web tetap 1 link, tapi saat usulan disimpan, datanya langsung terkirim otomatis ke Google Spreadsheet Anda dan dipisahkan ke sheet/tab masing-masing OPD sesuai nama Unit Kerja!
+              </p>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  URL Web App Google Apps Script:
+                </label>
+                <input
+                  type="url"
+                  value={googleAppsScriptUrl}
+                  onChange={(e) => setGoogleAppsScriptUrl(e.target.value)}
+                  placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono outline-none focus:border-teal-600 bg-slate-50 focus:bg-white transition-all text-slate-800"
+                />
+                <span className="text-[10px] text-slate-500 mt-0.5 block">
+                  Didapatkan dari menu Deploy &gt; New deployment &gt; Web app di Google Sheets
+                </span>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Nama Sheet / OPD Target:
+                </label>
+                <input
+                  type="text"
+                  value={targetSheetName}
+                  onChange={(e) => setTargetSheetName(e.target.value)}
+                  placeholder="Contoh: BKPSDM (Kosongkan jika ingin otomatis sesuai Unit Kerja)"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs outline-none focus:border-teal-600 font-medium"
+                />
+                <span className="text-[10px] text-slate-500 mt-0.5 block">
+                  Jika dikosongkan, script otomatis membuatkan sheet baru berdasarkan Unit Kerja pegawai
+                </span>
+              </div>
+
+              <div className="pt-1 flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleTestAppsScript}
+                    disabled={isTestingScript || !googleAppsScriptUrl.trim()}
+                    className="flex-1 py-2 px-3 bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-300 font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-teal-700" />
+                    <span>{isTestingScript ? 'Mengirim Tes...' : 'Uji Kirim Data ke Google Sheet'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowAppsScriptModal(true)}
+                    className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Code className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Lihat Kode Script</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSimpanWilayah}
+                  className="w-full py-2.5 px-3 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white font-bold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Simpan Pengaturan Google Apps Script</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Kolom Kanan: IMPOR DATA PEGAWAI (TEMPLATE 5 KOLOM SESUAI IMAGE.PNG & REPLACE LANGSUNG) */}
@@ -717,6 +882,95 @@ export const MasterPengaturan: React.FC<MasterPengaturanProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal / Popup: Kode Google Apps Script Siap Pakai */}
+      {showAppsScriptModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-scale-up">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/90">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center font-bold">
+                  <Code className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+                    Kode Google Apps Script (Multi-OPD Support)
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Tempel kode ini di menu Ekstensi &gt; Apps Script pada Google Sheet Anda
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAppsScriptModal(false)}
+                className="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-xs">
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-950 space-y-1">
+                <span className="font-bold flex items-center gap-1.5 text-amber-900">
+                  <HelpCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                  Cara Kerja Multi-Sheet (1 Web, Sheet Masing-Masing OPD):
+                </span>
+                <p className="text-[11px] text-amber-800 leading-relaxed">
+                  Script ini secara otomatis memeriksa nama OPD / Unit Kerja pengusul. Jika sheet untuk OPD tersebut belum ada di spreadsheet Anda, script akan <strong>langsung membuatkan sheet tab baru secara otomatis</strong> lengkap dengan baris header hijau dan format teks NIP yang tidak terpotong!
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-700">Kode JavaScript (Apps Script):</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyScript}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-800 hover:bg-teal-900 text-white rounded-lg font-bold text-xs shadow-xs cursor-pointer transition-all"
+                  >
+                    {copiedScript ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedScript ? 'Tersalin ke Clipboard!' : 'Salin Seluruh Kode'}</span>
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <pre className="bg-slate-900 text-teal-300 p-4 rounded-xl font-mono text-[11px] leading-relaxed overflow-x-auto max-h-80 select-all border border-slate-800">
+                    {getGoogleAppsScriptTemplateCode()}
+                  </pre>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-[11px] space-y-1.5 text-slate-700">
+                <h4 className="font-bold text-slate-900 text-xs">Langkah Deploy di Google Spreadsheet:</h4>
+                <ol className="list-decimal list-inside space-y-1 leading-relaxed">
+                  <li>Buat file baru di Google Drive: <strong>Google Spreadsheet</strong>.</li>
+                  <li>Di menu atas Google Sheet, klik <strong>Ekstensi (Extensions)</strong> &gt; <strong>Apps Script</strong>.</li>
+                  <li>Hapus semua teks yang ada, lalu klik tombol <strong>Salin Seluruh Kode</strong> di atas dan Paste (Ctrl+V).</li>
+                  <li>Klik tombol ikon disket <strong>Simpan</strong> (Ctrl+S).</li>
+                  <li>Di pojok kanan atas, klik tombol biru <strong>Terapkan (Deploy)</strong> &gt; <strong>Penerapan baru (New deployment)</strong>.</li>
+                  <li>Klik ikon gerigi &gt; pilih jenis <strong>Aplikasi Web (Web app)</strong>.</li>
+                  <li>Pada bagian <em>Siapa yang memiliki akses (Who has access)</em>, wajib pilih <strong>Siapa saja (Anyone)</strong>.</li>
+                  <li>Klik <strong>Terapkan (Deploy)</strong>, berikan izin Google, lalu salin <strong>URL Aplikasi Web</strong> yang dihasilkan ke kolom URL di aplikasi ini!</li>
+                </ol>
+              </div>
+            </div>
+
+            <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500">
+                Data akan aman tersimpan ganda (di laptop Anda & Google Spreadsheet).
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAppsScriptModal(false)}
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

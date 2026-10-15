@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Pegawai, UsulanSLKS, TingkatSLKS, StatusKelayakan, PengaturanInstansi } from '../types/slks';
 import { DAFTAR_PANGKAT_GOLONGAN, DAFTAR_BULAN } from '../data/pangkatData';
 import { parseNIP, hitungMasaKerja, evaluasiKelayakanSLKS, formatNIP } from '../utils/nipParser';
+import { sendUsulanToGoogleAppsScript } from '../utils/googleSheetsSync';
 import { MedalBadge } from './MedalBadge';
 import {
   Search,
@@ -17,6 +18,7 @@ import {
   MapPin,
   Sparkles,
   Lock,
+  CloudUpload,
 } from 'lucide-react';
 
 interface FormUsulanSLKSProps {
@@ -105,10 +107,10 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
       setKdPangkat(p.kdPangkat || 'III/a');
       setJabatan(p.jabatan || '');
       setUnitKerja(p.unitKerja || '');
-      setInstansi(p.instansi || 'Pemerintah Kabupaten Mukomuko');
-      setKabKota(p.kabKota || 'Kab. Mukomuko');
-      setProvinsi(p.provinsi || 'Bengkulu');
-      setKdWil(p.kdWil || '17.06');
+      setInstansi(pengaturan?.namaInstansi || p.instansi || 'Pemerintah Daerah');
+      setKabKota(pengaturan?.kabKota || p.kabKota || 'Kabupaten');
+      setProvinsi(pengaturan?.provinsi || p.provinsi || 'Provinsi');
+      setKdWil(pengaturan?.kdWil || p.kdWil || '00.00');
       setJenisKelamin(p.jenisKelamin || 'Laki-laki');
       setTanggalLahir(p.tanggalLahir || '');
       setTmtCpns(p.tmtCpns || '');
@@ -210,10 +212,10 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
     setKdPangkat(p.kdPangkat);
     setJabatan(p.jabatan);
     setUnitKerja(p.unitKerja);
-    setInstansi(p.instansi || 'Pemerintah Kabupaten Mukomuko');
-    setKabKota(p.kabKota || 'Kab. Mukomuko');
-    setProvinsi(p.provinsi || 'Bengkulu');
-    setKdWil(p.kdWil || '17.06');
+    setInstansi(pengaturan?.namaInstansi || 'Pemerintah Daerah');
+    setKabKota(pengaturan?.kabKota || 'Kabupaten');
+    setProvinsi(pengaturan?.provinsi || 'Provinsi');
+    setKdWil(pengaturan?.kdWil || '00.00');
     setJenisKelamin(p.jenisKelamin);
     setTanggalLahir(p.tanggalLahir);
     setTmtCpns(p.tmtCpns);
@@ -251,10 +253,10 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
     setKdPangkat('III/a');
     setJabatan('');
     setUnitKerja('');
-    setInstansi('Pemerintah Kabupaten Mukomuko');
-    setKabKota('Kab. Mukomuko');
-    setProvinsi('Bengkulu');
-    setKdWil('17.06');
+    setInstansi(pengaturan?.namaInstansi || 'Pemerintah Daerah');
+    setKabKota(pengaturan?.kabKota || 'Kabupaten');
+    setProvinsi(pengaturan?.provinsi || 'Provinsi');
+    setKdWil(pengaturan?.kdWil || '00.00');
     setTanggalLahir('');
     setTmtCpns('');
     setJenisKelamin('Laki-laki');
@@ -357,8 +359,23 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
     };
 
     onSaveUsulan(usulanObj);
-    setToastMessage(`Data usulan SLKS an. ${usulanObj.pegawai.nama} berhasil disimpan ke sistem!`);
-    setTimeout(() => setToastMessage(null), 4000);
+
+    if (pengaturan?.googleAppsScriptUrl?.trim()) {
+      sendUsulanToGoogleAppsScript(usulanObj, pengaturan).then((res) => {
+        if (res.success) {
+          setToastMessage(
+            `Data an. ${usulanObj.pegawai.nama} berhasil disimpan ke sistem & disinkronkan ke Google Sheet (${pengaturan.targetSheetName || usulanObj.pegawai.unitKerja || 'Usulan SLKS'})!`
+          );
+        } else {
+          setToastMessage(
+            `Data an. ${usulanObj.pegawai.nama} tersimpan di sistem. Info Sheet: ${res.message}`
+          );
+        }
+      });
+    } else {
+      setToastMessage(`Data usulan SLKS an. ${usulanObj.pegawai.nama} berhasil disimpan ke sistem!`);
+    }
+    setTimeout(() => setToastMessage(null), 4500);
   };
 
   return (
@@ -482,10 +499,10 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
               )}
             </div>
 
-            {/* NIP & Pangkat */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {/* NIP & Pangkat (Ukuran Lebih Nyaman) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   NIP (Nomor Induk Pegawai) *
                 </label>
                 <input
@@ -495,18 +512,18 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
                   value={nip}
                   onChange={(e) => handleNipChange(e.target.value)}
                   placeholder="18 digit NIP BKN"
-                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs font-mono tracking-wider outline-none bg-slate-50 focus:bg-white transition-all text-slate-900 font-bold"
+                  className="w-full px-3 py-2 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 rounded-lg text-sm font-mono tracking-wider outline-none bg-slate-50 focus:bg-white transition-all text-slate-900 font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   Pangkat & Golongan Ruang *
                 </label>
                 <select
                   value={kdPangkat}
                   onChange={(e) => setKdPangkat(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs outline-none bg-white font-medium text-slate-800 transition-all"
+                  className="w-full px-3 py-2 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 rounded-lg text-sm outline-none bg-white font-medium text-slate-800 transition-all cursor-pointer shadow-2xs"
                 >
                   {DAFTAR_PANGKAT_GOLONGAN.map((item) => (
                     <option key={item.kode} value={item.kode}>
@@ -519,7 +536,7 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
 
             {/* Nama Pegawai */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1">
                 Nama Pegawai (Lengkap dengan Gelar) *
               </label>
               <input
@@ -528,38 +545,38 @@ export const FormUsulanSLKS: React.FC<FormUsulanSLKSProps> = ({
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
                 placeholder="Nama lengkap pegawai beserta gelar"
-                className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs sm:text-sm outline-none font-semibold text-slate-900 transition-all"
+                className="w-full px-3 py-2 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 rounded-lg text-sm outline-none font-semibold text-slate-900 transition-all placeholder:text-slate-400"
               />
             </div>
 
-            {/* Jabatan & Unit Kerja (Berdampingan Sama Besar) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                  Jabatan *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={jabatan}
-                  onChange={(e) => setJabatan(e.target.value)}
-                  placeholder="Nama jabatan"
-                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs outline-none transition-all text-slate-800"
-                />
-              </div>
+            {/* Jabatan (Baris Penuh, Agak Besar & Jelas) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Jabatan *
+              </label>
+              <input
+                type="text"
+                required
+                value={jabatan}
+                onChange={(e) => setJabatan(e.target.value)}
+                placeholder="Contoh: Kepala Sub Bagian Umum dan Kepegawaian"
+                className="w-full px-3 py-2 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 rounded-lg text-sm outline-none transition-all text-slate-800 font-medium placeholder:text-slate-400"
+              />
+            </div>
 
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                  Unit Kerja *
-                </label>
-                <input
-                  type="text"
-                  value={unitKerja}
-                  onChange={(e) => setUnitKerja(e.target.value)}
-                  placeholder="Unit kerja"
-                  className="w-full px-2.5 py-1.5 border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600/20 rounded-lg text-xs outline-none transition-all text-slate-800"
-                />
-              </div>
+            {/* Unit Kerja (DI BAWAH JABATAN SESUAI PERMINTAAN USER #1 & AGAK BESAR) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Unit Kerja *
+              </label>
+              <input
+                type="text"
+                required
+                value={unitKerja}
+                onChange={(e) => setUnitKerja(e.target.value)}
+                placeholder="Contoh: Badan Kepegawaian dan Pengembangan Sumber Daya Manusia"
+                className="w-full px-3 py-2 border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 rounded-lg text-sm outline-none transition-all text-slate-800 font-medium placeholder:text-slate-400"
+              />
             </div>
 
             {/* Wilayah Administrasi (Kabupaten, Provinsi, Kode Wilayah TERKUNCI Sesuai Permintaan User #3) */}

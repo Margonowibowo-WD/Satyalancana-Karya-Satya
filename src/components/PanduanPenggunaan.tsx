@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 interface PanduanPenggunaanProps {
-  onNavigateToTab: (tab: 'input' | 'daftar' | 'cetak' | 'master' | 'panduan') => void;
+  onNavigateToTab: (tab: 'input' | 'daftar' | 'master' | 'panduan') => void;
   onExportBackup?: () => void;
   onImportBackup?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -218,16 +218,16 @@ export const PanduanPenggunaan: React.FC<PanduanPenggunaanProps> = ({
               <div className="w-8 h-8 rounded-full bg-teal-800 text-white font-extrabold flex items-center justify-center text-sm shadow-xs">
                 5
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Cetak Dokumen Resmi</h3>
+              <h3 className="text-sm font-bold text-slate-900">Sinkron Google Sheet & Ekspor CSV</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Buka tab <strong>Cetak Dokumen</strong> untuk mencetak <em>Daftar Nominatif Lampiran SK Presiden</em> atau <em>Formulir Portofolio F-01</em> per pegawai siap tanda tangan Pejabat Pembina Kepegawaian (PPK).
+                Setiap usulan otomatis tersinkron ke Google Sheet (multi-tab OPD) atau unduh berkas nominatif format standar BKN (10 kolom) dari tab <strong>Daftar & Statistik</strong>.
               </p>
               <button
                 type="button"
-                onClick={() => onNavigateToTab('cetak')}
+                onClick={() => onNavigateToTab('daftar')}
                 className="text-xs font-bold text-teal-700 hover:underline inline-flex items-center gap-1 cursor-pointer"
               >
-                Cetak Dokumen <ArrowRight className="w-3 h-3" />
+                Ke Daftar Usulan <ArrowRight className="w-3 h-3" />
               </button>
             </div>
           </div>
